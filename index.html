@@ -1,593 +1,612 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="utf-8">
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#050505">
-<meta name="apple-mobile-web-app-capable" content="yes">
 <title>Venus AI</title>
 
 <link rel="icon" href="https://i.ibb.co.com/wryLQv5P/photo-2026-11-03-00-49-56.jpg">
 
 <style>
 :root {
-  --bg: #050505;
-  --side: #080808;
-  --panel: #151515;
-  --panel2: #241239;
-  --line: #39205c;
-  --text: #f5f0ff;
-  --muted: #a995cf;
-  --accent: #a855f7;
-  --accent2: #7c3aed;
-  --user: #291344;
-  --avatar: url("https://i.ibb.co.com/wryLQv5P/photo-2026-11-03-00-49-56.jpg");
+  --bg:#050505;
+  --side:#090909;
+  --panel:#151515;
+  --panel2:#26143d;
+  --line:#39205c;
+  --text:#f5f0ff;
+  --muted:#a995cf;
+  --accent:#a855f7;
+  --accent2:#7c3aed;
+  --user:#291344;
+  --ava:url("https://i.ibb.co.com/wryLQv5P/photo-2026-11-03-00-49-56.jpg");
 }
 
-* {
-  box-sizing: border-box;
-  margin: 0;
-}
-
-html, body {
-  height: 100%;
-}
-
+* {box-sizing:border-box;margin:0}
+[hidden] {display:none!important}
+html,body {height:100%}
 body {
-  background: var(--bg);
-  color: var(--text);
-  font: 16px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  overflow: hidden;
+  background:var(--bg);
+  color:var(--text);
+  font:16px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif;
+  overflow:hidden;
 }
-
-button {
-  font: inherit;
-  color: inherit;
-  background: none;
-  border: 0;
-  cursor: pointer;
+button,input,textarea,select {font:inherit}
+button {color:inherit;cursor:pointer}
+.logo,.av {
+  background:var(--ava) center/cover no-repeat;
+  flex-shrink:0;
 }
-
-.app {
-  display: flex;
-  height: 100%;
-}
-
-/* AVATAR */
-
-.logo, .av {
-  background-image: var(--avatar);
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  flex-shrink: 0;
-}
-
 .logo {
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  box-shadow: 0 0 18px #9333ea66;
+  width:34px;height:34px;border-radius:50%;
+  box-shadow:0 0 20px #9333ea66;
+}
+.av {width:36px;height:36px;border-radius:50%}
+
+/* AUTHENTICATION */
+
+.auth-screen {
+  height:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+  overflow:auto;
+  background:
+    radial-gradient(ellipse at 50% 15%,#35125355,transparent 55%),
+    #050505;
+}
+.auth-card {
+  width:100%;
+  max-width:420px;
+  padding:28px;
+  border:1px solid var(--line);
+  border-radius:22px;
+  background:#101010;
+  box-shadow:0 15px 70px #000;
+}
+.auth-head {text-align:center;margin-bottom:22px}
+.auth-head .logo {
+  width:76px;height:76px;
+  margin:0 auto 14px;
+}
+.auth-head h1 {font-size:27px}
+.auth-head p {color:var(--muted);font-size:14px}
+.auth-google {
+  width:100%;
+  padding:12px;
+  background:#f5f5f5;
+  color:#171717;
+  border-radius:12px;
+  font-weight:600;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  gap:12px;
+  border:0;
+}
+.google-g {
+  font-size:21px;
+  font-weight:800;
+  color:#4285f4;
+}
+.auth-divider {
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin:17px 0;
+  color:var(--muted);
+  font-size:13px;
+}
+.auth-divider:before,.auth-divider:after {
+  content:"";height:1px;background:var(--line);flex:1;
+}
+.auth-form {display:flex;flex-direction:column;gap:11px}
+.auth-form input {
+  width:100%;
+  padding:12px 14px;
+  border-radius:11px;
+  border:1px solid var(--line);
+  outline:none;
+  background:#090909;
+  color:white;
+}
+.auth-form input:focus {border-color:var(--accent)}
+.auth-primary {
+  width:100%;
+  padding:12px;
+  border:0;
+  border-radius:11px;
+  background:linear-gradient(135deg,#a855f7,#6d28d9);
+  font-weight:700;
+}
+.auth-primary:disabled {opacity:.5}
+.auth-switch {
+  width:100%;
+  margin-top:17px;
+  color:#c084fc;
+  font-size:14px;
+  background:none;
+}
+.auth-error {
+  color:#ff9db0;
+  font-size:13px;
+  padding:9px;
+  background:#35101e;
+  border-radius:9px;
+  display:none;
+}
+.auth-info {
+  font-size:11px;
+  color:var(--muted);
+  text-align:center;
+  margin-top:17px;
 }
 
-.av {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  margin-top: 2px;
-}
+/* APPLICATION */
 
-/* SIDEBAR */
+.app {display:flex;height:100%}
 
 .side {
-  width: 268px;
-  background: var(--side);
-  display: flex;
-  flex-direction: column;
-  padding: 10px;
-  gap: 8px;
-  flex-shrink: 0;
-  transition: transform .25s;
-  padding-top: calc(10px + env(safe-area-inset-top, 0px));
-  padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+  width:268px;
+  background:var(--side);
+  display:flex;
+  flex-direction:column;
+  padding:10px;
+  gap:8px;
+  flex-shrink:0;
+  transition:transform .25s;
+  padding-top:calc(10px + env(safe-area-inset-top,0px));
+  padding-bottom:calc(10px + env(safe-area-inset-bottom,0px));
 }
-
 .brand {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 8px 10px;
-  font-weight: 700;
-  font-size: 18px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:8px 10px;
+  font-weight:700;
+  font-size:18px;
 }
-
 .new {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 12px;
-  border-radius: 10px;
-  text-align: left;
-  background: #1c102b;
-  transition: .2s;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:10px 12px;
+  border-radius:10px;
+  text-align:left;
+  background:#1c102b;
 }
-
-.new:hover {
-  background: #32194e;
-}
-
+.new:hover {background:#32194e}
 .list {
-  flex: 1;
-  overflow: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
+  flex:1;
+  overflow:auto;
+  display:flex;
+  flex-direction:column;
+  gap:2px;
 }
-
 .chat {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 9px 12px;
-  border-radius: 10px;
-  font-size: 14.5px;
-  text-align: left;
-  gap: 6px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:9px 12px;
+  border-radius:10px;
+  font-size:14px;
+  gap:6px;
 }
-
-.chat:hover {
-  background: var(--panel);
-}
-
-.chat.on {
-  background: var(--panel2);
-}
-
+.chat:hover {background:var(--panel)}
+.chat.on {background:var(--panel2)}
 .chat span {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  flex: 1;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  flex:1;
 }
-
 .chat .x {
-  opacity: 0;
-  color: var(--muted);
-  padding: 0 4px;
+  opacity:0;
+  color:var(--muted);
+  padding:0 4px;
 }
+.chat:hover .x {opacity:1}
+@media(hover:none) {.chat .x {opacity:.6}}
 
-.chat:hover .x {
-  opacity: 1;
+.foot {border-top:1px solid var(--line);padding-top:10px}
+.foot-actions {
+  display:flex;
+  gap:7px;
 }
-
-@media (hover:none) {
-  .chat .x {
-    opacity: .6;
-  }
+.foot-actions .new {
+  flex:1;
+  justify-content:center;
+  font-size:13px;
+  padding:10px 5px;
+  min-width:0;
 }
-
-.foot {
-  border-top: 1px solid var(--line);
-  padding-top: 8px;
+.telegram {
+  color:#d8b4fe;
+  text-decoration:none;
 }
-
-/* MAIN */
+.account {
+  display:flex;
+  align-items:center;
+  gap:9px;
+  padding:12px 5px 5px;
+  min-width:0;
+}
+.account-avatar {width:30px;height:30px;border-radius:50%;background:var(--ava) center/cover}
+.account-info {flex:1;min-width:0}
+.account-info div {
+  font-size:13px;
+  overflow:hidden;
+  white-space:nowrap;
+  text-overflow:ellipsis;
+}
+.account-info small {font-size:11px;color:var(--muted)}
+.logout {
+  padding:7px;
+  color:#c084fc;
+  font-size:12px;
+  border-radius:8px;
+}
+.logout:hover {background:var(--panel2)}
 
 .main {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-  height: 100%;
-  background: #050505;
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  min-width:0;
+  height:100%;
+  background:#050505;
 }
-
 .top {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 14px;
-  padding-top: calc(10px + env(safe-area-inset-top, 0px));
-  border-bottom: 1px solid transparent;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:10px 14px;
+  padding-top:calc(10px + env(safe-area-inset-top,0px));
 }
-
 .burger {
-  display: none;
-  padding: 6px 8px;
-  border-radius: 8px;
-  font-size: 20px;
+  display:none;
+  padding:6px 8px;
+  border-radius:8px;
+  font-size:20px;
+  background:none;
+  border:0;
+  color:white;
 }
-
 .title {
-  font-weight: 600;
-  color: var(--muted);
-  flex: 1;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  font-weight:600;
+  color:var(--muted);
+  flex:1;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
 }
-
-.msgs {
-  flex: 1;
-  overflow: auto;
-  scroll-behavior: smooth;
-}
-
-.wrap {
-  max-width: 760px;
-  margin: 0 auto;
-  padding: 16px 18px 24px;
-}
-
-.row {
-  display: flex;
-  gap: 14px;
-  margin: 22px 0;
-}
-
-.row.u {
-  justify-content: flex-end;
-}
-
+.msgs {flex:1;overflow:auto;scroll-behavior:smooth}
+.wrap {max-width:760px;margin:0 auto;padding:16px 18px 24px}
+.row {display:flex;gap:14px;margin:22px 0}
+.row.u {justify-content:flex-end}
 .bub {
-  min-width: 0;
-  max-width: 100%;
-  overflow-wrap: anywhere;
+  min-width:0;
+  max-width:100%;
+  overflow-wrap:anywhere;
 }
-
 .u .bub {
-  background: var(--user);
-  padding: 10px 16px;
-  border-radius: 20px;
-  max-width: 82%;
-  white-space: pre-wrap;
+  background:var(--user);
+  padding:10px 16px;
+  border-radius:20px;
+  max-width:82%;
+  white-space:pre-wrap;
 }
-
-.bub p {
-  margin: 0 0 .8em;
-}
-
-.bub p:last-child {
-  margin: 0;
-}
-
-.bub ul, .bub ol {
-  margin: 0 0 .8em 1.3em;
-}
-
-.bub h1, .bub h2, .bub h3 {
-  margin: .9em 0 .4em;
-  line-height: 1.3;
-}
-
-.bub h1 { font-size: 1.4em; }
-.bub h2 { font-size: 1.2em; }
-.bub h3 { font-size: 1.05em; }
-
+.bub p {margin:0 0 .8em}
+.bub p:last-child {margin:0}
+.bub ul,.bub ol {margin:0 0 .8em 1.3em}
+.bub h1,.bub h2,.bub h3 {margin:.9em 0 .4em;line-height:1.3}
+.bub h1 {font-size:1.4em}
+.bub h2 {font-size:1.2em}
+.bub h3 {font-size:1.05em}
 .bub code {
-  background: var(--panel2);
-  padding: 1px 6px;
-  border-radius: 6px;
-  font: 13.5px ui-monospace, Menlo, Consolas, monospace;
+  background:var(--panel2);
+  padding:1px 6px;
+  border-radius:6px;
+  font:13.5px ui-monospace,monospace;
 }
+.bub a {color:#c084fc}
 
 .pre {
-  background: #0c0618;
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  margin: .6em 0 .9em;
-  overflow: hidden;
+  background:#0c0618;
+  border:1px solid var(--line);
+  border-radius:12px;
+  margin:.6em 0 .9em;
+  overflow:hidden;
 }
-
 .pre .h {
-  display: flex;
-  justify-content: space-between;
-  padding: 6px 12px;
-  background: var(--panel);
-  font-size: 12.5px;
-  color: var(--muted);
+  display:flex;
+  justify-content:space-between;
+  padding:6px 12px;
+  background:var(--panel);
+  font-size:12px;
+  color:var(--muted);
 }
-
 .pre pre {
-  padding: 12px;
-  overflow: auto;
-  font: 13.5px/1.5 ui-monospace, Menlo, Consolas, monospace;
+  padding:12px;
+  overflow:auto;
+  font:13px/1.5 ui-monospace,monospace;
 }
+.pre code {background:none;padding:0}
+.pre button {background:none;border:0;color:#c084fc;cursor:pointer}
 
-.pre code {
-  background: none;
-  padding: 0;
-}
-
-.pre button {
-  color: #c084fc;
-}
-
-.dots {
-  display: inline-flex;
-  gap: 4px;
-  padding: 8px 0;
-}
-
+.dots {display:inline-flex;gap:4px;padding:8px 0}
 .dots i {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--accent);
-  animation: b 1s infinite;
+  width:7px;height:7px;border-radius:50%;
+  background:var(--accent);
+  animation:b 1s infinite;
 }
-
-.dots i:nth-child(2) { animation-delay: .15s; }
-.dots i:nth-child(3) { animation-delay: .3s; }
-
+.dots i:nth-child(2) {animation-delay:.15s}
+.dots i:nth-child(3) {animation-delay:.3s}
 @keyframes b {
-  0%, 60%, 100% {
-    opacity: .25;
-    transform: none;
-  }
-  30% {
-    opacity: 1;
-    transform: translateY(-3px);
-  }
+  0%,60%,100% {opacity:.25}
+  30% {opacity:1;transform:translateY(-3px)}
 }
-
 .err {
-  color: #ff9db0;
-  background: #3a1020;
-  border: 1px solid #6b2040;
-  padding: 10px 14px;
-  border-radius: 12px;
+  color:#ff9db0;
+  background:#3a1020;
+  border:1px solid #6b2040;
+  padding:10px 14px;
+  border-radius:12px;
 }
 
 /* HERO */
 
 .hero {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 14px;
-  text-align: center;
-  padding: 20px;
+  height:100%;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:14px;
+  text-align:center;
+  padding:20px;
 }
-
 .hero .logo {
-  width: 76px;
-  height: 76px;
-  box-shadow: 0 0 50px #a855f77a;
+  width:76px;height:76px;
+  box-shadow:0 0 50px #a855f77a;
 }
-
-.hero h1 {
-  font-size: 28px;
-}
-
-.hero p {
-  color: var(--muted);
-  max-width: 420px;
-}
-
+.hero h1 {font-size:28px}
+.hero p {color:var(--muted);max-width:420px}
 .sugs {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  justify-content: center;
-  margin-top: 6px;
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  justify-content:center;
+  margin-top:6px;
 }
-
 .sugs button {
-  border: 1px solid #6d28d9;
-  border-radius: 14px;
-  padding: 9px 14px;
-  font-size: 14px;
-  color: #d8b4fe;
-  transition: .2s;
+  border:1px solid #6d28d9;
+  border-radius:14px;
+  padding:9px 14px;
+  font-size:14px;
+  color:#d8b4fe;
+  background:#101010;
 }
-
-.sugs button:hover {
-  background: #32194e;
-  border-color: #a855f7;
-}
+.sugs button:hover {background:#32194e}
 
 /* COMPOSER */
 
 .comp {
-  padding: 8px 14px calc(14px + env(safe-area-inset-bottom, 0px));
+  padding:8px 14px calc(14px + env(safe-area-inset-bottom,0px));
 }
-
 .box {
-  max-width: 760px;
-  margin: 0 auto;
-  background: var(--panel);
-  border: 1px solid var(--line);
-  border-radius: 26px;
-  display: flex;
-  align-items: flex-end;
-  gap: 6px;
-  padding: 8px 8px 8px 18px;
+  max-width:760px;
+  margin:0 auto;
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:26px;
+  display:flex;
+  align-items:flex-end;
+  gap:7px;
+  padding:8px 8px 8px 18px;
 }
-
-.box:focus-within {
-  border-color: var(--accent);
-}
-
+.box:focus-within {border-color:var(--accent)}
 textarea {
-  flex: 1;
-  background: none;
-  border: 0;
-  outline: 0;
-  color: var(--text);
-  font: inherit;
-  resize: none;
-  max-height: 200px;
-  padding: 6px 0;
-  line-height: 1.5;
+  flex:1;
+  background:none;
+  border:0;
+  outline:0;
+  color:var(--text);
+  resize:none;
+  max-height:200px;
+  min-width:0;
+  padding:6px 0;
+  line-height:1.5;
 }
+textarea::placeholder {color:var(--muted)}
 
-textarea::placeholder {
-  color: var(--muted);
+.model-select {
+  width:128px;
+  max-width:34%;
+  background:#211333;
+  color:#e9d5ff;
+  border:1px solid #6d28d9;
+  border-radius:12px;
+  outline:none;
+  padding:8px 5px;
+  font-size:12px;
+  height:36px;
+  cursor:pointer;
 }
-
 .send {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #a855f7, #6d28d9);
-  display: grid;
-  place-items: center;
-  flex-shrink: 0;
-  color: #fff;
-  transition: .2s;
+  width:36px;height:36px;
+  border-radius:50%;
+  background:linear-gradient(135deg,#a855f7,#6d28d9);
+  display:grid;
+  place-items:center;
+  flex-shrink:0;
+  color:white;
+  border:0;
 }
-
-.send:hover {
-  background: linear-gradient(135deg, #c084fc, #9333ea);
-}
-
-.send:disabled {
-  opacity: .35;
-  cursor: default;
-}
-
+.send:hover {background:linear-gradient(135deg,#c084fc,#9333ea)}
+.send:disabled {opacity:.35;cursor:default}
 .note {
-  text-align: center;
-  font-size: 12px;
-  color: var(--muted);
-  margin-top: 8px;
+  text-align:center;
+  font-size:12px;
+  color:var(--muted);
+  margin-top:8px;
 }
 
-/* MODAL */
+/* SETTINGS */
 
 .mod {
-  position: fixed;
-  inset: 0;
-  background: #000c;
-  display: none;
-  align-items: center;
-  justify-content: center;
-  padding: 16px;
-  z-index: 30;
+  position:fixed;
+  inset:0;
+  background:#000c;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:16px;
+  z-index:30;
 }
-
-.mod.on {
-  display: flex;
-}
-
+.mod.on {display:flex}
 .card {
-  background: #151515;
-  border: 1px solid var(--line);
-  border-radius: 18px;
-  padding: 20px;
-  width: 100%;
-  max-width: 440px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+  background:#151515;
+  border:1px solid var(--line);
+  border-radius:18px;
+  padding:20px;
+  width:100%;
+  max-width:440px;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
 }
-
-.card h2 {
-  font-size: 18px;
-}
-
+.card h2 {font-size:18px}
 .card label {
-  font-size: 13px;
-  color: var(--muted);
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
+  font-size:13px;
+  color:var(--muted);
+  display:flex;
+  flex-direction:column;
+  gap:5px;
 }
-
-.card input {
-  background: var(--bg);
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  padding: 10px 12px;
-  color: var(--text);
-  font: inherit;
-  outline: 0;
+.card textarea {
+  background:#090909;
+  border:1px solid var(--line);
+  border-radius:10px;
+  padding:12px;
+  color:white;
+  width:100%;
+  min-height:130px;
+  max-height:250px;
 }
-
-.card input:focus {
-  border-color: var(--accent);
-}
-
-.btns {
-  display: flex;
-  gap: 8px;
-  justify-content: flex-end;
-}
-
+.btns {display:flex;gap:8px;justify-content:flex-end}
 .btn {
-  padding: 9px 16px;
-  border-radius: 10px;
-  border: 1px solid var(--line);
-  background: #211333;
+  padding:9px 16px;
+  border-radius:10px;
+  border:1px solid var(--line);
+  background:#211333;
+  color:white;
 }
-
 .btn.p {
-  background: linear-gradient(135deg, #a855f7, #6d28d9);
-  border: 0;
-  color: #fff;
+  background:linear-gradient(135deg,#a855f7,#6d28d9);
+  border:0;
 }
-
-.btn.p:hover {
-  background: linear-gradient(135deg, #c084fc, #9333ea);
-}
-
-.hint {
-  font-size: 12px;
-  color: var(--muted);
-}
-
-.back {
-  display: none;
-}
-
-button:focus-visible {
-  outline: 2px solid #c084fc;
-  outline-offset: 3px;
-}
+.back {display:none}
 
 @media(max-width:800px) {
   .side {
-    position: fixed;
-    inset: 0 auto 0 0;
-    z-index: 20;
-    transform: translateX(-100%);
-    width: 280px;
+    position:fixed;
+    inset:0 auto 0 0;
+    z-index:20;
+    transform:translateX(-100%);
+    width:280px;
   }
-
-  .side.on {
-    transform: none;
-  }
-
+  .side.on {transform:none}
   .back.on {
-    display: block;
-    position: fixed;
-    inset: 0;
-    background: #0009;
-    z-index: 15;
+    display:block;
+    position:fixed;
+    inset:0;
+    background:#0009;
+    z-index:15;
   }
-
-  .burger {
-    display: block;
-  }
+  .burger {display:block}
 }
-
-::-webkit-scrollbar {
-  width: 8px;
+@media(max-width:400px) {
+  .box {padding-left:12px;gap:5px}
+  .model-select {width:105px;font-size:11px}
+  .comp {padding-left:8px;padding-right:8px}
 }
-
-::-webkit-scrollbar-thumb {
-  background: var(--line);
-  border-radius: 8px;
-}
+::-webkit-scrollbar {width:8px}
+::-webkit-scrollbar-thumb {background:var(--line);border-radius:8px}
 </style>
 </head>
 
 <body>
 
-<div class="app">
+<!-- AUTH SCREEN -->
+
+<div class="auth-screen" id="authScreen">
+  <div class="auth-card">
+
+    <div class="auth-head">
+      <div class="logo"></div>
+      <h1>Venus AI</h1>
+      <p id="authSubtitle">Войдите, чтобы продолжить</p>
+    </div>
+
+    <button class="auth-google" id="googleBtn">
+      <span class="google-g">G</span>
+      Продолжить с Google
+    </button>
+
+    <div class="auth-divider">или через аккаунт</div>
+
+    <form class="auth-form" id="authForm">
+
+      <input id="aName"
+        placeholder="Имя пользователя"
+        autocomplete="nickname"
+        hidden>
+
+      <input id="aEmail"
+        type="email"
+        placeholder="Email"
+        autocomplete="email"
+        required>
+
+      <input id="aPassword"
+        type="password"
+        placeholder="Пароль"
+        autocomplete="current-password"
+        minlength="6"
+        required>
+
+      <input id="aConfirm"
+        type="password"
+        placeholder="Повторите пароль"
+        autocomplete="new-password"
+        minlength="6"
+        hidden>
+
+      <div class="auth-error" id="authError"></div>
+
+      <button class="auth-primary" id="authSubmit" type="submit">
+        Войти
+      </button>
+
+    </form>
+
+    <button class="auth-switch" id="authSwitch">
+      Нет аккаунта? Зарегистрироваться
+    </button>
+
+    <div class="auth-info">
+      Вход защищён Firebase Authentication.
+    </div>
+
+  </div>
+</div>
+
+<!-- MAIN APP -->
+
+<div class="app" id="app" hidden>
 
   <aside class="side" id="side">
 
@@ -601,9 +620,33 @@ button:focus-visible {
     <div class="list" id="list"></div>
 
     <div class="foot">
-      <button class="new" id="setBtn" style="width:100%">
-        ⚙ Настройки
-      </button>
+
+      <div class="foot-actions">
+
+        <button class="new" id="setBtn">⚙ Настройки</button>
+
+        <a class="new telegram"
+          href="https://t.me/venus1ai"
+          target="_blank"
+          rel="noopener">
+          ✈ Telegram
+        </a>
+
+      </div>
+
+      <div class="account">
+        <div class="account-avatar"></div>
+
+        <div class="account-info">
+          <div id="accountName">Пользователь</div>
+          <small id="accountEmail"></small>
+        </div>
+
+        <button class="logout" id="logoutBtn" title="Выйти">
+          Выйти
+        </button>
+      </div>
+
     </div>
 
   </aside>
@@ -631,12 +674,21 @@ button:focus-visible {
           placeholder="Напишите сообщение Venus AI…"
         ></textarea>
 
-        <button class="send" id="send" disabled aria-label="Отправить">
+        <select class="model-select" id="modelSelect"
+          title="Выберите модель">
+          <option value="stepfun/step-3.7-flash">⚡ Flash</option>
+          <option value="nvidia/nemotron-3.5-super-vl:free">🧠 Medium</option>
+        </select>
+
+        <button class="send" id="send" disabled
+          aria-label="Отправить">
+
           <svg width="18" height="18" viewBox="0 0 24 24"
             fill="none" stroke="currentColor" stroke-width="2.4"
             stroke-linecap="round" stroke-linejoin="round">
             <path d="M12 19V5M5 12l7-7 7 7"/>
           </svg>
+
         </button>
 
       </div>
@@ -656,36 +708,13 @@ button:focus-visible {
 
   <div class="card">
 
-    <h2>Настройки</h2>
-
-    <label>
-      API-ключ
-      <input id="kKey" type="password" placeholder="sk..." autocomplete="off">
-    </label>
-
-    <label>
-      Endpoint
-      <input id="kUrl" placeholder="/api">
-    </label>
-
-    <label>
-      Модель
-      <input id="kModel" placeholder="например gpt-4o" list="models">
-    </label>
-
-    <datalist id="models"></datalist>
+    <h2>Настройки Venus AI</h2>
 
     <label>
       Системная инструкция
-      <input id="kSys" placeholder="Ты Venus AI — дружелюбный помощник.">
+      <textarea id="kSys"
+        placeholder="Ты Venus AI — дружелюбный и умный ИИ-помощник."></textarea>
     </label>
-
-    <div class="hint">
-      Данные хранятся только в этом браузере.
-      <button id="loadM" style="color:#c084fc;text-decoration:underline">
-        Загрузить список моделей
-      </button>
-    </div>
 
     <div class="btns">
       <button class="btn" id="cancel">Закрыть</button>
@@ -695,11 +724,66 @@ button:focus-visible {
   </div>
 </div>
 
-<script>
+<!-- FIREBASE + APP -->
+
+<script type="module">
+
+import { initializeApp }
+  from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
+
+import {
+  getAuth,
+  GoogleAuthProvider,
+  signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
+  onAuthStateChanged,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  updateProfile,
+  signOut
+} from "https://www.gstatic.com/firebasejs/12.5.0/firebase-auth.js";
+
+
+/* FIREBASE CONFIG */
+
+const firebaseConfig = {
+  apiKey: "AIzaSyApnoSkcthpVPcMSAJXL-PFT-UpEi9ZdoI",
+  authDomain: "exaroton-65e4e.firebaseapp.com",
+  databaseURL: "https://exaroton-65e4e-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "exaroton-65e4e",
+  storageBucket: "exaroton-65e4e.firebasestorage.app",
+  messagingSenderId: "175992933890",
+  appId: "1:175992933890:web:5196918da3f79520e5211b",
+  measurementId: "G-V8RF5D60MH"
+};
+
+const firebaseApp = initializeApp(firebaseConfig);
+const auth = getAuth(firebaseApp);
+
+const googleProvider = new GoogleAuthProvider();
+googleProvider.setCustomParameters({
+  prompt: "select_account"
+});
+
+
+/* CONFIG */
+
 const $ = id => document.getElementById(id);
 
+const API_URL = "/api";
+
+const DEFAULT_SYS =
+  "Ты Venus AI — дружелюбный и умный ИИ-помощник. Отвечай на языке пользователя.";
+
+const MODELS = {
+  flash: "stepfun/step-3.7-flash",
+  medium: "nvidia/nemotron-3.5-super-vl:free"
+};
+
 const store = {
-  get(k, d) {
+
+  get(k,d) {
     try {
       const v = localStorage.getItem(k);
       return v ? JSON.parse(v) : d;
@@ -708,60 +792,323 @@ const store = {
     }
   },
 
-  set(k, v) {
+  set(k,v) {
     try {
-      localStorage.setItem(k, JSON.stringify(v));
+      localStorage.setItem(k,JSON.stringify(v));
     } catch(e) {}
   }
+
 };
 
-let cfg = Object.assign({
-  key: "",
-  url: "/api",
-  model: "gpt-4o",
-  sys: "Ты Venus AI — дружелюбный и умный ИИ-помощник. Отвечай на языке пользователя."
-}, store.get("venus_cfg", {}));
-
-if (/drakezakuru\.com|\.php$/.test(cfg.url)) {
-  cfg.url = "/api";
-  cfg.key = "";
-  store.set("venus_cfg", cfg);
-}
-
-let chats = store.get("venus_chats", []);
+let currentUser = null;
+let currentChats = [];
 let cur = null;
 let busy = false;
 let ctrl = null;
+let systemPrompt = DEFAULT_SYS;
+let authMode = "login";
 
-const isProxy = () => !/^https?:/i.test(cfg.url);
 
-const ep = p => isProxy()
-  ? cfg.url + "?p=" + p
-  : cfg.url.replace(/\/$/, "") + "/" + p;
+/* STORAGE */
 
-const auth = k => k
-  ? {Authorization: "Bearer " + k}
-  : {};
+const chatKey = uid => "venus_chats_" + uid;
+const sysKey = uid => "venus_sys_" + uid;
+const modelKey = uid => "venus_model_" + uid;
 
-const esc = s => String(s).replace(/[&<>]/g, c => ({
-  "&": "&amp;",
-  "<": "&lt;",
-  ">": "&gt;"
-}[c]));
+function saveChats() {
+  if (!currentUser) return;
+  store.set(chatKey(currentUser.uid),currentChats);
+}
+
+function saveSystem() {
+  if (!currentUser) return;
+  store.set(sysKey(currentUser.uid),systemPrompt);
+}
+
+
+/* AUTH ERRORS */
+
+function authError(message) {
+  const e = $("authError");
+  e.textContent = message;
+  e.style.display = "block";
+}
+
+function clearAuthError() {
+  $("authError").textContent = "";
+  $("authError").style.display = "none";
+}
+
+function firebaseError(e) {
+
+  const errors = {
+    "auth/email-already-in-use":"Этот email уже зарегистрирован.",
+    "auth/invalid-email":"Неправильный формат email.",
+    "auth/weak-password":"Пароль должен содержать минимум 6 символов.",
+    "auth/user-not-found":"Аккаунт не найден.",
+    "auth/wrong-password":"Неправильный пароль.",
+    "auth/invalid-credential":"Неправильный email или пароль.",
+    "auth/too-many-requests":"Слишком много попыток. Попробуйте позже.",
+    "auth/popup-closed-by-user":"Окно Google было закрыто.",
+    "auth/popup-blocked":"Браузер заблокировал окно авторизации.",
+    "auth/unauthorized-domain":"Домен сайта не добавлен в Firebase.",
+    "auth/network-request-failed":"Проверьте подключение к интернету.",
+    "auth/operation-not-allowed":"Этот способ входа не включён в Firebase."
+  };
+
+  return errors[e.code] || e.message || "Неизвестная ошибка.";
+}
+
+
+/* AUTH MODE */
+
+function setAuthMode(mode) {
+
+  authMode = mode;
+  clearAuthError();
+
+  const register = mode === "register";
+
+  $("aName").hidden = !register;
+  $("aConfirm").hidden = !register;
+
+  $("aName").required = register;
+  $("aConfirm").required = register;
+
+  $("aPassword").autocomplete =
+    register ? "new-password" : "current-password";
+
+  $("authSubmit").textContent =
+    register ? "Зарегистрироваться" : "Войти";
+
+  $("authSwitch").textContent =
+    register
+      ? "Уже есть аккаунт? Войти"
+      : "Нет аккаунта? Зарегистрироваться";
+
+  $("authSubtitle").textContent =
+    register
+      ? "Создайте свой аккаунт Venus AI"
+      : "Войдите, чтобы продолжить";
+
+}
+
+$("authSwitch").onclick = () => {
+  setAuthMode(authMode === "login" ? "register" : "login");
+};
+
+
+/* REGISTRATION AND LOGIN */
+
+$("authForm").addEventListener("submit", async e => {
+
+  e.preventDefault();
+  clearAuthError();
+
+  const email = $("aEmail").value.trim();
+  const password = $("aPassword").value;
+  const nickname = $("aName").value.trim();
+  const confirm = $("aConfirm").value;
+
+  const button = $("authSubmit");
+
+  button.disabled = true;
+
+  try {
+
+    if (authMode === "register") {
+
+      if (nickname.length < 2) {
+        throw new Error("Имя должно содержать минимум 2 символа.");
+      }
+
+      if (password !== confirm) {
+        throw new Error("Пароли не совпадают.");
+      }
+
+      if (password.length < 6) {
+        throw new Error("Пароль должен содержать минимум 6 символов.");
+      }
+
+      const result = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+
+      await updateProfile(result.user,{
+        displayName:nickname
+      });
+
+    } else {
+
+      await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+
+    }
+
+  } catch(e) {
+
+    authError(firebaseError(e));
+
+  } finally {
+
+    button.disabled = false;
+
+  }
+
+});
+
+
+/* GOOGLE AUTH */
+
+$("googleBtn").onclick = async () => {
+
+  clearAuthError();
+
+  try {
+
+    const mobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+    if (mobile) {
+      await signInWithRedirect(auth,googleProvider);
+    } else {
+      await signInWithPopup(auth,googleProvider);
+    }
+
+  } catch(e) {
+
+    if (
+      e.code === "auth/popup-blocked" ||
+      e.code === "auth/popup-closed-by-user"
+    ) {
+      try {
+        await signInWithRedirect(auth,googleProvider);
+      } catch(err) {
+        authError(firebaseError(err));
+      }
+    } else {
+      authError(firebaseError(e));
+    }
+
+  }
+
+};
+
+
+/* GOOGLE REDIRECT RESULT */
+
+try {
+  await getRedirectResult(auth);
+} catch(e) {
+  authError(firebaseError(e));
+}
+
+
+/* SIGN OUT */
+
+$("logoutBtn").onclick = async () => {
+
+  try {
+    await signOut(auth);
+  } catch(e) {
+    alert(firebaseError(e));
+  }
+
+};
+
+
+/* AUTH STATE */
+
+onAuthStateChanged(auth,user => {
+
+  currentUser = user;
+
+  if (user) {
+
+    $("authScreen").hidden = true;
+    $("app").hidden = false;
+
+    currentChats = store.get(chatKey(user.uid),[]);
+    cur = null;
+
+    systemPrompt = store.get(sysKey(user.uid),DEFAULT_SYS);
+
+    const selectedModel = store.get(
+      modelKey(user.uid),
+      MODELS.flash
+    );
+
+    $("modelSelect").value =
+      Object.values(MODELS).includes(selectedModel)
+        ? selectedModel
+        : MODELS.flash;
+
+    $("accountName").textContent =
+      user.displayName || "Пользователь";
+
+    $("accountEmail").textContent =
+      user.email || "";
+
+    $("kSys").value = systemPrompt;
+
+    renderList();
+    renderMsgs();
+    upd();
+
+  } else {
+
+    $("authScreen").hidden = false;
+    $("app").hidden = true;
+
+    currentChats = [];
+    cur = null;
+
+  }
+
+});
+
+
+/* MODEL SELECTION */
+
+$("modelSelect").addEventListener("change",() => {
+
+  if (!currentUser) return;
+
+  store.set(
+    modelKey(currentUser.uid),
+    $("modelSelect").value
+  );
+
+});
+
 
 /* MARKDOWN */
 
+const esc = s => String(s).replace(/[&<>"']/g,c => ({
+  "&":"&amp;",
+  "<":"&lt;",
+  ">":"&gt;",
+  '"':"&quot;",
+  "'":"&#39;"
+}[c]));
+
 function md(t) {
+
   const blocks = [];
 
-  t = t.replace(/```(\w*)\n?([\s\S]*?)(```|$)/g, (m, l, c) => {
-    blocks.push({l, c});
-    return "\u0000" + (blocks.length - 1) + "\u0000";
+  t = t.replace(/```(\w*)\n?([\s\S]*?)(```|$)/g,(m,l,c) => {
+    blocks.push({l,c});
+    return "\u0000" + (blocks.length-1) + "\u0000";
   });
 
   t = esc(t);
 
   const lines = t.split("\n");
+
   let out = "";
   let list = null;
 
@@ -773,57 +1120,64 @@ function md(t) {
   };
 
   for (let ln of lines) {
+
     let m;
 
     const inl = s => s
-      .replace(/`([^`]+)`/g, "<code>$1</code>")
-      .replace(/\*\*([^*]+)\*\*/g, "<b>$1</b>")
-      .replace(/(^|[^*])\*([^*\s][^*]*)\*/g, "$1<i>$2</i>")
-      .replace(/\[([^\]]+)\]\((https?:[^)\s]+)\)/g,
-        '<a href="$2" target="_blank" rel="noopener" style="color:#c99bff">$1</a>');
+      .replace(/`([^`]+)`/g,"<code>$1</code>")
+      .replace(/\*\*([^*]+)\*\*/g,"<b>$1</b>")
+      .replace(/(^|[^*])\*([^*\s][^*]*)\*/g,"$1<i>$2</i>")
+      .replace(/\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g,
+        '<a href="$2" target="_blank" rel="noopener">$1</a>');
 
-    if (m = ln.match(/^(#{1,3})\s+(.*)/)) {
+    if (m=ln.match(/^(#{1,3})\s+(.*)/)) {
+
       close();
       out += `<h${m[1].length}>${inl(m[2])}</h${m[1].length}>`;
-    }
 
-    else if (m = ln.match(/^\s*[-*]\s+(.*)/)) {
-      if (list !== "ul") {
+    } else if (m=ln.match(/^\s*[-*]\s+(.*)/)) {
+
+      if (list!=="ul") {
         close();
         out += "<ul>";
-        list = "ul";
+        list="ul";
       }
-      out += "<li>" + inl(m[1]) + "</li>";
-    }
 
-    else if (m = ln.match(/^\s*\d+[.)]\s+(.*)/)) {
-      if (list !== "ol") {
+      out += "<li>"+inl(m[1])+"</li>";
+
+    } else if (m=ln.match(/^\s*\d+[.)]\s+(.*)/)) {
+
+      if (list!=="ol") {
         close();
         out += "<ol>";
-        list = "ol";
+        list="ol";
       }
-      out += "<li>" + inl(m[1]) + "</li>";
-    }
 
-    else if (!ln.trim()) {
+      out += "<li>"+inl(m[1])+"</li>";
+
+    } else if (!ln.trim()) {
+
       close();
-    }
 
-    else if (/^\u0000\d+\u0000$/.test(ln.trim())) {
+    } else if (/^\u0000\d+\u0000$/.test(ln.trim())) {
+
       close();
       out += ln.trim();
+
+    } else {
+
+      close();
+      out += "<p>"+inl(ln)+"</p>";
+
     }
 
-    else {
-      close();
-      out += "<p>" + inl(ln) + "</p>";
-    }
   }
 
   close();
 
-  return out.replace(/\u0000(\d+)\u0000/g, (m, i) => {
-    const b = blocks[+i];
+  return out.replace(/\u0000(\d+)\u0000/g,(m,i) => {
+
+    const b=blocks[+i];
 
     return `
       <div class="pre">
@@ -831,62 +1185,74 @@ function md(t) {
           <span>${esc(b.l || "код")}</span>
           <button data-copy>Копировать</button>
         </div>
-        <pre><code>${esc(b.c.replace(/\n$/, ""))}</code></pre>
+        <pre><code>${esc(b.c.replace(/\n$/,""))}</code></pre>
       </div>
     `;
+
   });
+
 }
 
-/* CHATS */
 
-function save() {
-  store.set("venus_chats", chats);
-}
+/* CHAT LIST */
 
 function active() {
-  return chats.find(c => c.id === cur);
+  return currentChats.find(c=>c.id===cur);
 }
 
 function renderList() {
-  $("list").innerHTML = "";
 
-  chats.forEach(c => {
-    const b = document.createElement("div");
+  $("list").innerHTML="";
 
-    b.className = "chat" + (c.id === cur ? " on" : "");
+  currentChats.forEach(c => {
 
-    b.innerHTML = `
+    const b=document.createElement("div");
+
+    b.className="chat"+(c.id===cur?" on":"");
+
+    b.innerHTML=`
       <span></span>
       <button class="x" aria-label="Удалить">✕</button>
     `;
 
-    b.firstChild.textContent = c.title;
+    b.firstChild.textContent=c.title;
 
-    b.onclick = e => {
+    b.onclick=e => {
+
       if (e.target.closest(".x")) {
-        chats = chats.filter(x => x.id !== c.id);
 
-        if (cur === c.id) cur = null;
+        currentChats=currentChats.filter(x=>x.id!==c.id);
 
-        save();
+        if(cur===c.id)cur=null;
+
+        saveChats();
         renderList();
         renderMsgs();
+
       } else {
-        cur = c.id;
+
+        cur=c.id;
+
         renderList();
         renderMsgs();
         closeSide();
+
       }
+
     };
 
     $("list").appendChild(b);
+
   });
+
 }
 
-/* MAIN SCREEN */
+
+/* HOME */
 
 function hero() {
-  const s = [
+
+  const suggestions=[
     "Придумай идею для стартапа",
     "Объясни квантовую физику просто",
     "Напиши письмо начальнику",
@@ -896,26 +1262,24 @@ function hero() {
   return `
     <div class="hero">
       <div class="logo"></div>
-
       <h1>Чем могу помочь?</h1>
-
-      <p>
-        Я Venus AI. Задайте вопрос, попросите написать текст или код.
-      </p>
-
+      <p>Я Venus AI. Задайте вопрос, попросите написать текст или код.</p>
       <div class="sugs">
-        ${s.map(x => `
+        ${suggestions.map(x=>`
           <button data-s="${esc(x)}">${esc(x)}</button>
         `).join("")}
       </div>
     </div>
   `;
+
 }
 
-/* MESSAGE DISPLAY */
+
+/* MESSAGES */
 
 function msgHTML(m) {
-  return m.role === "user"
+
+  return m.role==="user"
     ? `
       <div class="row u">
         <div class="bub">${esc(m.content)}</div>
@@ -927,22 +1291,25 @@ function msgHTML(m) {
         <div class="bub">${md(m.content)}</div>
       </div>
     `;
+
 }
 
 function renderMsgs() {
-  const c = active();
 
-  $("ttl").textContent = c ? c.title : "Venus AI";
+  const c=active();
 
-  $("wrap").innerHTML =
-    c && c.messages.length
+  $("ttl").textContent=c?c.title:"Venus AI";
+
+  $("wrap").innerHTML=
+    c&&c.messages.length
       ? c.messages.map(msgHTML).join("")
       : hero();
 
-  $("wrap").style.height =
-    c && c.messages.length ? "" : "100%";
+  $("wrap").style.height=
+    c&&c.messages.length?"":"100%";
 
-  $("msgs").scrollTop = $("msgs").scrollHeight;
+  $("msgs").scrollTop=$("msgs").scrollHeight;
+
 }
 
 function closeSide() {
@@ -950,49 +1317,48 @@ function closeSide() {
   $("back").classList.remove("on");
 }
 
-/* SEND MESSAGE */
+
+/* SEND */
 
 async function send(text) {
-  text = text.trim();
 
-  if (!text || busy) return;
+  text=text.trim();
 
-  if (!cfg.key && !isProxy()) {
-    openSet();
-    return;
-  }
+  if(!text||busy||!currentUser)return;
 
-  let c = active();
+  let c=active();
 
-  if (!c) {
-    c = {
-      id: Date.now(),
-      title: text.slice(0, 40),
-      messages: []
+  if(!c) {
+
+    c={
+      id:Date.now(),
+      title:text.slice(0,40),
+      messages:[]
     };
 
-    chats.unshift(c);
-    cur = c.id;
+    currentChats.unshift(c);
+    cur=c.id;
+
   }
 
   c.messages.push({
-    role: "user",
-    content: text
+    role:"user",
+    content:text
   });
 
-  $("inp").value = "";
+  $("inp").value="";
   grow();
   upd();
 
   renderList();
   renderMsgs();
 
-  const am = {
-    role: "assistant",
-    content: ""
+  const am={
+    role:"assistant",
+    content:""
   };
 
-  $("wrap").insertAdjacentHTML("beforeend", `
+  $("wrap").insertAdjacentHTML("beforeend",`
     <div class="row" id="live">
       <div class="av"></div>
       <div class="bub">
@@ -1003,171 +1369,200 @@ async function send(text) {
     </div>
   `);
 
-  $("msgs").scrollTop = $("msgs").scrollHeight;
+  $("msgs").scrollTop=$("msgs").scrollHeight;
 
-  busy = true;
+  busy=true;
   upd();
 
-  ctrl = new AbortController();
+  ctrl=new AbortController();
 
-  const live = () => $("live").lastElementChild;
+  const live=()=> $("live")?.lastElementChild;
 
   try {
-    const msgs = [];
 
-    if (cfg.sys) {
-      msgs.push({
-        role: "system",
-        content: cfg.sys
+    const messages=[];
+
+    if(systemPrompt) {
+      messages.push({
+        role:"system",
+        content:systemPrompt
       });
     }
 
-    c.messages.forEach(m => {
-      msgs.push({
-        role: m.role,
-        content: m.content
+    c.messages.forEach(m=>{
+      messages.push({
+        role:m.role,
+        content:m.content
       });
     });
 
-    const r = await fetch(ep("chat/completions"), {
-      method: "POST",
-      signal: ctrl.signal,
+    const selectedModel=$("modelSelect").value;
 
-      headers: Object.assign(
-        {"Content-Type": "application/json"},
-        auth(cfg.key)
-      ),
+    const r=await fetch(API_URL+"?p=chat/completions",{
 
-      body: JSON.stringify({
-        model: cfg.model,
-        messages: msgs,
-        stream: true
+      method:"POST",
+      signal:ctrl.signal,
+
+      headers:{
+        "Content-Type":"application/json"
+      },
+
+      body:JSON.stringify({
+        model:selectedModel,
+        messages:messages,
+        stream:true
       })
+
     });
 
-    if (!r.ok) {
-      let t = "";
+    if(!r.ok) {
+
+      let t="";
 
       try {
-        t = await r.text();
+        t=await r.text();
       } catch(e) {}
 
       throw new Error(
-        "Ошибка " + r.status + (t ? ": " + t.slice(0, 200) : "")
+        "Ошибка "+r.status+(t?": "+t.slice(0,300):"")
       );
+
     }
 
-    const ct = r.headers.get("content-type") || "";
+    const ct=r.headers.get("content-type")||"";
 
-    if (ct.includes("event-stream") && r.body) {
-      const rd = r.body.getReader();
-      const dec = new TextDecoder();
+    if(ct.includes("event-stream")&&r.body) {
 
-      let buf = "";
+      const rd=r.body.getReader();
+      const dec=new TextDecoder();
 
-      while (true) {
-        const {done, value} = await rd.read();
+      let buf="";
 
-        if (done) break;
+      while(true) {
 
-        buf += dec.decode(value, {stream: true});
+        const {done,value}=await rd.read();
 
-        const parts = buf.split("\n");
-        buf = parts.pop();
+        if(done)break;
 
-        for (const p of parts) {
-          const l = p.trim();
+        buf+=dec.decode(value,{stream:true});
 
-          if (!l.startsWith("data:")) continue;
+        const parts=buf.split("\n");
+        buf=parts.pop();
 
-          const d = l.slice(5).trim();
+        for(const p of parts) {
 
-          if (d === "[DONE]") continue;
+          const l=p.trim();
+
+          if(!l.startsWith("data:"))continue;
+
+          const d=l.slice(5).trim();
+
+          if(d==="[DONE]")continue;
 
           try {
-            const j = JSON.parse(d);
 
-            const t =
-              j.choices &&
-              j.choices[0] &&
-              j.choices[0].delta &&
-              j.choices[0].delta.content || "";
+            const j=JSON.parse(d);
 
-            if (t) {
-              am.content += t;
+            const t=
+              j.choices?.[0]?.delta?.content||"";
 
-              live().innerHTML = md(am.content);
+            if(typeof t==="string"&&t) {
 
-              $("msgs").scrollTop = $("msgs").scrollHeight;
+              am.content+=t;
+
+              if(live()) {
+                live().innerHTML=md(am.content);
+              }
+
+              $("msgs").scrollTop=$("msgs").scrollHeight;
+
             }
 
           } catch(e) {}
+
         }
+
       }
 
     } else {
-      const j = await r.json();
 
-      am.content =
-        j.choices &&
-        j.choices[0] &&
-        j.choices[0].message &&
-        j.choices[0].message.content || "";
+      const j=await r.json();
 
-      live().innerHTML = md(am.content);
+      am.content=
+        j.choices?.[0]?.message?.content||"";
+
+      if(live())live().innerHTML=md(am.content);
+
     }
 
-    if (am.content) {
+    if(am.content) {
       c.messages.push(am);
+    }
+
+    if(!am.content) {
+      if(live()) {
+        live().innerHTML="<span>Модель не вернула ответ.</span>";
+      }
     }
 
   } catch(e) {
 
-    if (e.name === "AbortError") {
-      if (am.content) c.messages.push(am);
+    if(e.name==="AbortError") {
+
+      if(am.content) {
+        c.messages.push(am);
+      } else if($("live")) {
+        $("live").remove();
+      }
 
     } else {
-      const hint =
-        e.message === "Failed to fetch"
-          ? "Не удалось подключиться к серверу. Проверьте endpoint, ключ и интернет."
+
+      const hint=
+        e.message==="Failed to fetch"
+          ? "Не удалось подключиться к серверу. Проверьте API и интернет."
           : e.message;
 
-      live().innerHTML = `
-        <div class="err">${esc(hint)}</div>
-      `;
+      if(live()) {
+        live().innerHTML=`
+          <div class="err">${esc(hint)}</div>
+        `;
+      }
+
     }
+
   }
 
-  busy = false;
-  ctrl = null;
+  busy=false;
+  ctrl=null;
 
-  save();
+  saveChats();
   upd();
 
-  if (am.content) {
-    renderMsgs();
-  }
+  if(am.content)renderMsgs();
+
 }
 
-/* BUTTONS */
+
+/* SEND BUTTON */
 
 function upd() {
-  const s = $("send");
 
-  if (busy) {
-    s.disabled = false;
+  const s=$("send");
 
-    s.innerHTML = `
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+  if(busy) {
+
+    s.disabled=false;
+
+    s.innerHTML=`
+      <svg width="14" height="14" viewBox="0 0 24 24"
+        fill="currentColor">
         <rect x="5" y="5" width="14" height="14" rx="2"/>
       </svg>
     `;
 
-    s.dataset.stop = 1;
-
   } else {
 
-    s.innerHTML = `
+    s.innerHTML=`
       <svg width="18" height="18" viewBox="0 0 24 24"
         fill="none" stroke="currentColor" stroke-width="2.4"
         stroke-linecap="round" stroke-linejoin="round">
@@ -1175,159 +1570,133 @@ function upd() {
       </svg>
     `;
 
-    s.dataset.stop = "";
-    s.disabled = !$("inp").value.trim();
+    s.disabled=!$("inp").value.trim();
+
   }
+
 }
 
 function grow() {
-  const t = $("inp");
 
-  t.style.height = "auto";
-  t.style.height = Math.min(t.scrollHeight, 200) + "px";
+  const t=$("inp");
+
+  t.style.height="auto";
+  t.style.height=Math.min(t.scrollHeight,200)+"px";
+
 }
+
+
+/* SETTINGS */
 
 function openSet() {
-  $("kKey").value = cfg.key;
-  $("kUrl").value = cfg.url;
-  $("kModel").value = cfg.model;
-  $("kSys").value = cfg.sys;
 
+  $("kSys").value=systemPrompt;
   $("mod").classList.add("on");
+
 }
+
+$("setBtn").onclick=()=>{
+  openSet();
+  closeSide();
+};
+
+$("cancel").onclick=()=>{
+  $("mod").classList.remove("on");
+};
+
+$("save").onclick=()=>{
+
+  systemPrompt=$("kSys").value.trim()||DEFAULT_SYS;
+
+  saveSystem();
+
+  $("mod").classList.remove("on");
+
+};
+
 
 /* EVENTS */
 
-$("inp").addEventListener("input", () => {
+$("inp").addEventListener("input",()=>{
   grow();
   upd();
 });
 
-$("inp").addEventListener("keydown", e => {
-  if (
-    e.key === "Enter" &&
+$("inp").addEventListener("keydown",e=>{
+
+  if(
+    e.key==="Enter" &&
     !e.shiftKey &&
     !/Mobi|Android/i.test(navigator.userAgent)
   ) {
+
     e.preventDefault();
     send($("inp").value);
+
   }
+
 });
 
-$("send").onclick = () => {
-  if (busy && ctrl) {
+$("send").onclick=()=>{
+
+  if(busy&&ctrl) {
     ctrl.abort();
   } else {
     send($("inp").value);
   }
+
 };
 
-$("newBtn").onclick = () => {
-  cur = null;
+$("newBtn").onclick=()=>{
+
+  cur=null;
 
   renderList();
   renderMsgs();
   closeSide();
 
   $("inp").focus();
+
 };
 
-$("burger").onclick = () => {
+$("burger").onclick=()=>{
   $("side").classList.add("on");
   $("back").classList.add("on");
 };
 
-$("back").onclick = closeSide;
+$("back").onclick=closeSide;
 
-$("setBtn").onclick = () => {
-  openSet();
-  closeSide();
-};
 
-$("cancel").onclick = () => {
-  $("mod").classList.remove("on");
-};
+/* COPY AND SUGGESTIONS */
 
-$("save").onclick = () => {
-  cfg = {
-    key: $("kKey").value.trim(),
-    url: $("kUrl").value.trim() || "/api",
-    model: $("kModel").value.trim() || "gpt-4o",
-    sys: $("kSys").value.trim()
-  };
+$("wrap").addEventListener("click",e=>{
 
-  store.set("venus_cfg", cfg);
+  const s=e.target.closest("[data-s]");
 
-  $("mod").classList.remove("on");
-};
-
-$("loadM").onclick = async () => {
-  try {
-    const u = $("kUrl").value.trim() || "/api";
-
-    const r = await fetch(
-      !/^https?:/i.test(u)
-        ? u + "?p=models"
-        : u.replace(/\/$/, "") + "/models",
-      {
-        headers: auth($("kKey").value.trim())
-      }
-    );
-
-    if (!r.ok) throw new Error("HTTP " + r.status);
-
-    const j = await r.json();
-
-    $("models").innerHTML = (j.data || [])
-      .map(m => `<option value="${esc(m.id)}">`)
-      .join("");
-
-    $("loadM").textContent =
-      "Список загружен — выберите модель";
-
-  } catch(e) {
-    $("loadM").textContent = "Не удалось загрузить";
-  }
-};
-
-/* CLICK EVENTS */
-
-$("wrap").addEventListener("click", e => {
-
-  const s = e.target.closest("[data-s]");
-
-  if (s) {
+  if(s) {
     send(s.dataset.s);
     return;
   }
 
-  const c = e.target.closest("[data-copy]");
+  const c=e.target.closest("[data-copy]");
 
-  if (c) {
-    const t = c.closest(".pre").querySelector("code").textContent;
+  if(c) {
 
-    navigator.clipboard
-      .writeText(t)
-      .then(() => {
-        c.textContent = "Скопировано";
+    const t=c.closest(".pre").querySelector("code").textContent;
 
-        setTimeout(() => {
-          c.textContent = "Копировать";
-        }, 1500);
-      })
-      .catch(() => {});
+    navigator.clipboard.writeText(t).then(()=>{
+
+      c.textContent="Скопировано";
+
+      setTimeout(()=>{
+        c.textContent="Копировать";
+      },1500);
+
+    }).catch(()=>{});
+
   }
+
 });
-
-/* START */
-
-renderList();
-renderMsgs();
-upd();
-
-if (!cfg.key && !isProxy()) {
-  setTimeout(openSet, 400);
-}
 
 </script>
 </body>
