@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1a0b2e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Venus AI</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E♀%3C/text%3E%3C/svg%3E">
+<style>
+:root{
+  --bg:#150a26; --side:#0f0720; --panel:#201038; --panel2:#2a1650; --line:#3a2266;
+  --text:#f1e9ff; --muted:#a995cf; --accent:#a855f7; --accent2:#7c3aed; --user:#3b1d6e;
+}
+*{box-sizing:border-box;margin:0}
+html,body{height:100%}
+body{background:var(--bg);color:var(--text);font:16px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;overflow:hidden}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+.app{display:flex;height:100%}
+/* sidebar */
+.side{width:268px;background:var(--side);display:flex;flex-direction:column;padding:10px;gap:8px;flex-shrink:0;transition:transform .25s;padding-top:calc(10px + env(safe-area-inset-top,0px));padding-bottom:calc(10px + env(safe-area-inset-bottom,0px))}
+.brand{display:flex;align-items:center;gap:10px;padding:8px 10px;font-weight:700;font-size:18px}
+.logo{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:grid;place-items:center;font-size:17px}
+.new{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;text-align:left}
+.new:hover,.chat:hover{background:var(--panel)}
+.list{flex:1;overflow:auto;display:flex;flex-direction:column;gap:2px}
+.chat{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;border-radius:10px;font-size:14.5px;text-align:left;gap:6px}
+.chat.on{background:var(--panel2)}
+.chat span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+.chat .x{opacity:0;color:var(--muted);padding:0 4px}
+.chat:hover .x{opacity:1}
+@media(hover:none){.chat .x{opacity:.6}}
+.foot{border-top:1px solid var(--line);padding-top:8px}
+/* main */
+.main{flex:1;display:flex;flex-direction:column;min-width:0;height:100%}
+.top{display:flex;align-items:center;gap:8px;padding:10px 14px;padding-top:calc(10px + env(safe-area-inset-top,0px));border-bottom:1px solid transparent}
+.burger{display:none;padding:6px 8px;border-radius:8px;font-size:20px}
+.title{font-weight:600;color:var(--muted);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.msgs{flex:1;overflow:auto;scroll-behavior:smooth}
+.wrap{max-width:760px;margin:0 auto;padding:16px 18px 24px}
+.row{display:flex;gap:14px;margin:22px 0}
+.row.u{justify-content:flex-end}
+.av{width:30px;height:30px;border-radius:50%;flex-shrink:0;background:linear-gradient(135deg,var(--accent),var(--accent2));display:grid;place-items:center;font-size:16px;margin-top:2px}
+.bub{min-width:0;max-width:100%;overflow-wrap:anywhere}
+.u .bub{background:var(--user);padding:10px 16px;border-radius:20px;max-width:82%;white-space:pre-wrap}
+.bub p{margin:0 0 .8em}.bub p:last-child{margin:0}
+.bub ul,.bub ol{margin:0 0 .8em 1.3em}
+.bub h1,.bub h2,.bub h3{margin:.9em 0 .4em;line-height:1.3}
+.bub h1{font-size:1.4em}.bub h2{font-size:1.2em}.bub h3{font-size:1.05em}
+.bub code{background:var(--panel2);padding:1px 6px;border-radius:6px;font:13.5px ui-monospace,Menlo,Consolas,monospace}
+.pre{background:#0c0618;border:1px solid var(--line);border-radius:12px;margin:.6em 0 .9em;overflow:hidden}
+.pre .h{display:flex;justify-content:space-between;padding:6px 12px;background:var(--panel);font-size:12.5px;color:var(--muted)}
+.pre pre{padding:12px;overflow:auto;font:13.5px/1.5 ui-monospace,Menlo,Consolas,monospace}
+.pre code{background:none;padding:0}
+.dots{display:inline-flex;gap:4px;padding:8px 0}
+.dots i{width:7px;height:7px;border-radius:50%;background:var(--accent);animation:b 1s infinite}
+.dots i:nth-child(2){animation-delay:.15s}.dots i:nth-child(3){animation-delay:.3s}
+@keyframes b{0%,60%,100%{opacity:.25;transform:none}30%{opacity:1;transform:translateY(-3px)}}
+.err{color:#ff9db0;background:#3a1020;border:1px solid #6b2040;padding:10px 14px;border-radius:12px}
+/* hero */
+.hero{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;padding:20px}
+.hero .logo{width:64px;height:64px;font-size:34px;box-shadow:0 0 50px #a855f77a}
+.hero h1{font-size:28px}
+.hero p{color:var(--muted);max-width:420px}
+.sugs{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:6px}
+.sugs button{border:1px solid var(--line);border-radius:14px;padding:9px 14px;font-size:14px;color:var(--muted)}
+.sugs button:hover{background:var(--panel);color:var(--text)}
+/* composer */
+.comp{padding:8px 14px calc(14px + env(safe-area-inset-bottom,0px))}
+.box{max-width:760px;margin:0 auto;background:var(--panel);border:1px solid var(--line);border-radius:26px;display:flex;align-items:flex-end;gap:6px;padding:8px 8px 8px 18px}
+.box:focus-within{border-color:var(--accent)}
+textarea{flex:1;background:none;border:0;outline:0;color:var(--text);font:inherit;resize:none;max-height:200px;padding:6px 0;line-height:1.5}
+textarea::placeholder{color:var(--muted)}
+.send{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:grid;place-items:center;flex-shrink:0;color:#fff}
+.send:disabled{opacity:.35;cursor:default}
+.note{text-align:center;font-size:12px;color:var(--muted);margin-top:8px}
+/* modal */
+.mod{position:fixed;inset:0;background:#000a;display:none;align-items:center;justify-content:center;padding:16px;z-index:30}
+.mod.on{display:flex}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:20px;width:100%;max-width:440px;display:flex;flex-direction:column;gap:12px}
+.card h2{font-size:18px}
+.card label{font-size:13px;color:var(--muted);display:flex;flex-direction:column;gap:5px}
+.card input{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px;color:var(--text);font:inherit;outline:0}
+.card input:focus{border-color:var(--accent)}
+.btns{display:flex;gap:8px;justify-content:flex-end}
+.btn{padding:9px 16px;border-radius:10px;border:1px solid var(--line)}
+.btn.p{background:linear-gradient(135deg,var(--accent),var(--accent2));border:0;color:#fff}
+.hint{font-size:12px;color:var(--muted)}
+.back{display:none}
+@media(max-width:800px){
+  .side{position:fixed;inset:0 auto 0 0;z-index:20;transform:translateX(-100%);width:280px}
+  .side.on{transform:none}
+  .back.on{display:block;position:fixed;inset:0;background:#0009;z-index:15}
+  .burger{display:block}
+}
+::-webkit-scrollbar{width:8px}::-webkit-scrollbar-thumb{background:var(--line);border-radius:8px}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="side" id="side">
+    <div class="brand"><div class="logo">♀</div>Venus AI</div>
+    <button class="new" id="newBtn">＋ Новый чат</button>
+    <div class="list" id="list"></div>
+    <div class="foot"><button class="new" id="setBtn" style="width:100%">⚙ Настройки</button></div>
+  </aside>
+  <div class="back" id="back"></div>
+  <main class="main">
+    <div class="top"><button class="burger" id="burger">☰</button><div class="title" id="ttl">Venus AI</div></div>
+    <div class="msgs" id="msgs"><div class="wrap" id="wrap"></div></div>
+    <div class="comp">
+      <div class="box">
+        <textarea id="inp" rows="1" placeholder="Напишите сообщение Venus AI…"></textarea>
+        <button class="send" id="send" disabled aria-label="Отправить">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+        </button>
+      </div>
+      <div class="note">Venus AI может ошибаться. Проверяйте важную информацию.</div>
+    </div>
+  </main>
+</div>
+
+<div class="mod" id="mod">
+  <div class="card">
+    <h2>Настройки</h2>
+    <label>API-ключ<input id="kKey" type="password" placeholder="sk-..." autocomplete="off"></label>
+    <label>Endpoint<input id="kUrl" placeholder="/api"></label>
+    <label>Модель<input id="kModel" placeholder="например gpt-4o" list="models"></label>
+    <datalist id="models"></datalist>
+    <label>Системная инструкция<input id="kSys" placeholder="Ты Venus AI — дружелюбный помощник."></label>
+    <div class="hint">Данные хранятся только в этом браузере. <button id="loadM" style="color:var(--accent);text-decoration:underline">Загрузить список моделей</button></div>
+    <div class="btns"><button class="btn" id="cancel">Закрыть</button><button class="btn p" id="save">Сохранить</button></div>
+  </div>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const store={
+  get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},
+  set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+};
+let cfg=Object.assign({key:"",url:"/api",model:"gpt-4o",sys:"Ты Venus AI — дружелюбный и умный ИИ-помощник. Отвечай на языке пользователя."},store.get("venus_cfg",{}));
+if(/drakezakuru\.com|\.php$/.test(cfg.url)){cfg.url="/api";cfg.key="";store.set("venus_cfg",cfg)}
+let chats=store.get("venus_chats",[]);
+let cur=null,busy=false,ctrl=null;
+const isProxy=()=>!/^https?:/.test(cfg.url);
+const ep=p=>isProxy()?cfg.url+"?p="+p:cfg.url.replace(/\/$/,"")+"/"+p;
+const auth=k=>k?{Authorization:"Bearer "+k}:{};
+
+const esc=s=>s.replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+function md(t){
+  const blocks=[];
+  t=t.replace(/```(\w*)\n?([\s\S]*?)(```|$)/g,(m,l,c)=>{blocks.push({l,c});return "\u0000"+(blocks.length-1)+"\u0000"});
+  t=esc(t);
+  const lines=t.split("\n");let out="",list=null;
+  const close=()=>{if(list){out+="</"+list+">";list=null}};
+  for(let ln of lines){
+    let m;
+    const inl=s=>s.replace(/`([^`]+)`/g,"<code>$1</code>").replace(/\*\*([^*]+)\*\*/g,"<b>$1</b>").replace(/(^|[^*])\*([^*\s][^*]*)\*/g,"$1<i>$2</i>").replace(/\[([^\]]+)\]\((https?:[^)\s]+)\)/g,'<a href="$2" target="_blank" rel="noopener" style="color:#c99bff">$1</a>');
+    if(m=ln.match(/^(#{1,3})\s+(.*)/)){close();out+=`<h${m[1].length}>${inl(m[2])}</h${m[1].length}>`}
+    else if(m=ln.match(/^\s*[-*]\s+(.*)/)){if(list!=="ul"){close();out+="<ul>";list="ul"}out+="<li>"+inl(m[1])+"</li>"}
+    else if(m=ln.match(/^\s*\d+[.)]\s+(.*)/)){if(list!=="ol"){close();out+="<ol>";list="ol"}out+="<li>"+inl(m[1])+"</li>"}
+    else if(!ln.trim()){close()}
+    else if(/^\u0000\d+\u0000$/.test(ln.trim())){close();out+=ln.trim()}
+    else{close();out+="<p>"+inl(ln)+"</p>"}
+  }
+  close();
+  return out.replace(/\u0000(\d+)\u0000/g,(m,i)=>{
+    const b=blocks[+i];
+    return `<div class="pre"><div class="h"><span>${esc(b.l||"код")}</span><button data-copy>Копировать</button></div><pre><code>${esc(b.c.replace(/\n$/,""))}</code></pre></div>`;
+  });
+}
+
+function save(){store.set("venus_chats",chats)}
+function active(){return chats.find(c=>c.id===cur)}
+function renderList(){
+  $("list").innerHTML="";
+  chats.forEach(c=>{
+    const b=document.createElement("div");
+    b.className="chat"+(c.id===cur?" on":"");
+    b.innerHTML=`<span></span><button class="x" aria-label="Удалить">✕</button>`;
+    b.firstChild.textContent=c.title;
+    b.onclick=e=>{if(e.target.closest(".x")){chats=chats.filter(x=>x.id!==c.id);if(cur===c.id)cur=null;save();renderList();renderMsgs()}else{cur=c.id;renderList();renderMsgs();closeSide()}};
+    $("list").appendChild(b);
+  });
+}
+function hero(){
+  const s=["Придумай идею для стартапа","Объясни квантовую физику просто","Напиши письмо начальнику","Помоги выучить английский"];
+  return `<div class="hero"><div class="logo">♀</div><h1>Чем могу помочь?</h1><p>Я Venus AI. Задайте вопрос, попросите написать текст или код.</p><div class="sugs">${s.map(x=>`<button data-s="${x}">${x}</button>`).join("")}</div></div>`;
+}
+function msgHTML(m){
+  return m.role==="user"
+    ?`<div class="row u"><div class="bub">${esc(m.content)}</div></div>`
+    :`<div class="row"><div class="av">♀</div><div class="bub">${md(m.content)}</div></div>`;
+}
+function renderMsgs(){
+  const c=active();
+  $("ttl").textContent=c?c.title:"Venus AI";
+  $("wrap").innerHTML=c&&c.messages.length?c.messages.map(msgHTML).join(""):hero();
+  $("wrap").style.height=c&&c.messages.length?"":"100%";
+  $("msgs").scrollTop=$("msgs").scrollHeight;
+}
+function closeSide(){$("side").classList.remove("on");$("back").classList.remove("on")}
+
+async function send(text){
+  text=text.trim();
+  if(!text||busy)return;
+  if(!cfg.key&&!isProxy()){openSet();return}
+  let c=active();
+  if(!c){c={id:Date.now(),title:text.slice(0,40),messages:[]};chats.unshift(c);cur=c.id}
+  c.messages.push({role:"user",content:text});
+  $("inp").value="";grow();upd();
+  renderList();renderMsgs();
+  const am={role:"assistant",content:""};
+  $("wrap").insertAdjacentHTML("beforeend",`<div class="row" id="live"><div class="av">♀</div><div class="bub"><div class="dots"><i></i><i></i><i></i></div></div></div>`);
+  $("msgs").scrollTop=$("msgs").scrollHeight;
+  busy=true;upd();ctrl=new AbortController();
+  const live=()=>$("live").lastChild;
+  try{
+    const msgs=[];
+    if(cfg.sys)msgs.push({role:"system",content:cfg.sys});
+    c.messages.forEach(m=>msgs.push({role:m.role,content:m.content}));
+    const r=await fetch(ep("chat/completions"),{
+      method:"POST",signal:ctrl.signal,
+      headers:Object.assign({"Content-Type":"application/json"},auth(cfg.key)),
+      body:JSON.stringify({model:cfg.model,messages:msgs,stream:true})
+    });
+    if(!r.ok){let t="";try{t=await r.text()}catch(e){}throw new Error("Ошибка "+r.status+(t?": "+t.slice(0,200):""))}
+    const ct=r.headers.get("content-type")||"";
+    if(ct.includes("event-stream")&&r.body){
+      const rd=r.body.getReader(),dec=new TextDecoder();let buf="";
+      while(true){
+        const {done,value}=await rd.read();if(done)break;
+        buf+=dec.decode(value,{stream:true});
+        const parts=buf.split("\n");buf=parts.pop();
+        for(const p of parts){
+          const l=p.trim();if(!l.startsWith("data:"))continue;
+          const d=l.slice(5).trim();if(d==="[DONE]")continue;
+          try{const j=JSON.parse(d);const t=j.choices&&j.choices[0]&&(j.choices[0].delta&&j.choices[0].delta.content||"");if(t){am.content+=t;live().innerHTML=md(am.content);$("msgs").scrollTop=$("msgs").scrollHeight}}catch(e){}
+        }
+      }
+    }else{
+      const j=await r.json();
+      am.content=(j.choices&&j.choices[0]&&j.choices[0].message&&j.choices[0].message.content)||"";
+      live().innerHTML=md(am.content);
+    }
+    if(am.content)c.messages.push(am);
+  }catch(e){
+    if(e.name==="AbortError"){if(am.content)c.messages.push(am)}
+    else{
+      const hint=e.message==="Failed to fetch"?"Не удалось подключиться к серверу. Проверьте endpoint, ключ и интернет.":e.message;
+      live().innerHTML=`<div class="err">${esc(hint)}</div>`;
+    }
+  }
+  busy=false;ctrl=null;save();upd();
+  if(am.content)renderMsgs();
+}
+function upd(){
+  const s=$("send");
+  if(busy){s.disabled=false;s.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="5" y="5" width="14" height="14" rx="2"/></svg>';s.dataset.stop=1}
+  else{s.innerHTML='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>';s.dataset.stop="";s.disabled=!$("inp").value.trim()}
+}
+function grow(){const t=$("inp");t.style.height="auto";t.style.height=Math.min(t.scrollHeight,200)+"px"}
+function openSet(){$("kKey").value=cfg.key;$("kUrl").value=cfg.url;$("kModel").value=cfg.model;$("kSys").value=cfg.sys;$("mod").classList.add("on")}
+
+$("inp").addEventListener("input",()=>{grow();upd()});
+$("inp").addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey&&!/Mobi|Android/i.test(navigator.userAgent)){e.preventDefault();send($("inp").value)}});
+$("send").onclick=()=>{if(busy&&ctrl)ctrl.abort();else send($("inp").value)};
+$("newBtn").onclick=()=>{cur=null;renderList();renderMsgs();closeSide();$("inp").focus()};
+$("burger").onclick=()=>{$("side").classList.add("on");$("back").classList.add("on")};
+$("back").onclick=closeSide;
+$("setBtn").onclick=()=>{openSet();closeSide()};
+$("cancel").onclick=()=>$("mod").classList.remove("on");
+$("save").onclick=()=>{
+  cfg={key:$("kKey").value.trim(),url:$("kUrl").value.trim()||"/api",model:$("kModel").value.trim()||"gpt-4o",sys:$("kSys").value.trim()};
+  store.set("venus_cfg",cfg);$("mod").classList.remove("on");
+};
+$("loadM").onclick=async()=>{
+  try{
+    const u=$("kUrl").value.trim()||"/api";const r=await fetch(!/^https?:/.test(u)?u+"?p=models":u.replace(/\/$/,"")+"/models",{headers:auth($("kKey").value.trim())});
+    const j=await r.json();
+    $("models").innerHTML=(j.data||[]).map(m=>`<option value="${esc(m.id)}">`).join("");
+    $("loadM").textContent="Список загружен — выберите в поле «Модель»";
+  }catch(e){$("loadM").textContent="Не удалось загрузить"}
+};
+$("wrap").addEventListener("click",e=>{
+  const s=e.target.closest("[data-s]");if(s){send(s.dataset.s);return}
+  const c=e.target.closest("[data-copy]");
+  if(c){const t=c.closest(".pre").querySelector("code").textContent;
+    (navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>{c.textContent="Скопировано";setTimeout(()=>c.textContent="Копировать",1500)}).catch(()=>{})}
+});
+renderList();renderMsgs();upd();
+if(!cfg.key&&!isProxy())setTimeout(openSet,400);
+</script>
+</body>
+</html>
