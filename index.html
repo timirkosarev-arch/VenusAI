@@ -593,7 +593,7 @@ textarea::placeholder {color:var(--muted)}
 
 <!-- AUTH SCREEN -->
 
-<div class="auth-screen" id="authScreen">
+<div class="auth-screen" id="authScreen" hidden>
   <div class="auth-card">
 
     <div class="auth-head">
@@ -657,7 +657,7 @@ textarea::placeholder {color:var(--muted)}
 
 <!-- MAIN APP -->
 
-<div class="app" id="app" hidden>
+<div class="app" id="app">
 
   <aside class="side" id="side">
 
@@ -693,7 +693,7 @@ textarea::placeholder {color:var(--muted)}
           <small id="accountEmail"></small>
         </div>
 
-        <button class="logout" id="logoutBtn" title="Выйти">
+        <button class="logout" id="logoutBtn" title="Выйти" hidden>
           Выйти
         </button>
       </div>
@@ -886,7 +886,7 @@ const store = {
 
 };
 
-let currentUser = null;
+let currentUser = {uid:"guest",displayName:"Гость",email:""};
 let currentChats = [];
 let cur = null;
 let busy = false;
@@ -906,9 +906,16 @@ const chatKey = uid => "venus_chats_" + uid;
 const sysKey = uid => "venus_sys_" + uid;
 const modelKey = uid => "venus_model_" + uid;
 
+// Удаляем старые сохранённые истории от предыдущих версий приложения.
+try {
+  for (const key of Object.keys(localStorage)) {
+    if (key.startsWith("venus_chats_")) localStorage.removeItem(key);
+  }
+} catch(e) {}
+
 function saveChats() {
-  if (!currentUser) return;
-  store.set(chatKey(currentUser.uid),currentChats);
+  // История чатов существует только в оперативной памяти вкладки.
+  // После перезагрузки страницы или её закрытия она исчезает.
 }
 
 function saveSystem() {
@@ -916,35 +923,15 @@ function saveSystem() {
   store.set(sysKey(currentUser.uid),systemPrompt);
 }
 
-/* ATTACHMENT STORAGE: binary data stays in IndexedDB, not localStorage */
-const mediaDB = new Promise((resolve,reject) => {
-  const request = indexedDB.open("venus_ai_media",1);
-  request.onupgradeneeded = () => {
-    const db = request.result;
-    if (!db.objectStoreNames.contains("media")) db.createObjectStore("media");
-  };
-  request.onsuccess = () => resolve(request.result);
-  request.onerror = () => reject(request.error);
-});
+/* TEMPORARY ATTACHMENT STORAGE: memory only */
+const mediaStore = new Map();
 
 async function putMedia(id,value) {
-  const db=await mediaDB;
-  return new Promise((resolve,reject)=>{
-    const tx=db.transaction("media","readwrite");
-    tx.objectStore("media").put(value,id);
-    tx.oncomplete=()=>resolve();
-    tx.onerror=()=>reject(tx.error);
-  });
+  mediaStore.set(id,value);
 }
 
 async function getMedia(id) {
-  const db=await mediaDB;
-  return new Promise((resolve,reject)=>{
-    const tx=db.transaction("media","readonly");
-    const req=tx.objectStore("media").get(id);
-    req.onsuccess=()=>resolve(req.result||null);
-    req.onerror=()=>reject(req.error);
-  });
+  return mediaStore.get(id) || null;
 }
 
 function makeId() {
@@ -1147,60 +1134,54 @@ $("logoutBtn").onclick = async () => {
 };
 
 
-/* AUTH STATE */
-
+/* AUTH STATE — REGISTRATION IS OPTIONAL */
+let authStateInitialized = false;
 onAuthStateChanged(auth,user => {
 
-  currentUser = user;
+  const nextUser = user || {uid:"guest",displayName:"Гость",email:""};
+  const accountChanged = authStateInitialized && currentUser.uid !== nextUser.uid;
+  currentUser = nextUser;
 
-  if (user) {
+  // Всегда открываем приложение. Аккаунт не требуется.
+  $("authScreen").hidden = true;
+  $("app").hidden = false;
 
-    $("authScreen").hidden = true;
-    $("app").hidden = false;
-
-    currentChats = store.get(chatKey(user.uid),[]);
-    cur = null;
-
-    const savedSystem = store.get(sysKey(user.uid),null);
-    systemPrompt = (!savedSystem || savedSystem === LEGACY_DEFAULT_SYS)
-      ? DEFAULT_SYS
-      : savedSystem;
-    if (!savedSystem || savedSystem === LEGACY_DEFAULT_SYS) saveSystem();
-
-    const selectedModel = store.get(
-      modelKey(user.uid),
-      MODELS.flash
-    );
-
-    $("modelSelect").value =
-      Object.values(MODELS).includes(selectedModel)
-        ? selectedModel
-        : MODELS.flash;
-
-    $("accountName").textContent =
-      user.displayName || "Пользователь";
-
-    $("accountEmail").textContent =
-      user.email || "";
-
-    $("kSys").value = systemPrompt;
-
-    renderList();
-    renderMsgs();
-    upd();
-
-  } else {
-
-    $("authScreen").hidden = false;
-    $("app").hidden = true;
-
+  // При смене аккаунта очищаем текущую историю в памяти.
+  if (accountChanged) {
     currentChats = [];
     cur = null;
-
   }
+  authStateInitialized = true;
 
+  const settingsId = currentUser.uid;
+  const savedSystem = store.get(sysKey(settingsId),null);
+  systemPrompt = (!savedSystem || savedSystem === LEGACY_DEFAULT_SYS)
+    ? DEFAULT_SYS
+    : savedSystem;
+  if (!savedSystem || savedSystem === LEGACY_DEFAULT_SYS) saveSystem();
+
+  const selectedModel = store.get(
+    modelKey(settingsId),
+    MODELS.flash
+  );
+
+  $("modelSelect").value =
+    Object.values(MODELS).includes(selectedModel)
+      ? selectedModel
+      : MODELS.flash;
+
+  $("accountName").textContent = user
+    ? (user.displayName || "Пользователь")
+    : "Гость";
+  $("accountEmail").textContent = user ? (user.email || "") : "Без регистрации";
+  $("logoutBtn").hidden = !user;
+
+  $("kSys").value = systemPrompt;
+
+  renderList();
+  renderMsgs();
+  upd();
 });
-
 
 /* MODEL SELECTION */
 
