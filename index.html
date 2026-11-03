@@ -454,6 +454,57 @@ textarea::placeholder {color:var(--muted)}
   margin-top:8px;
 }
 
+.attach {
+  width:36px;height:36px;flex-shrink:0;
+  display:grid;place-items:center;
+  border:1px solid var(--line);border-radius:50%;
+  background:#211333;color:#e9d5ff;font-size:19px;
+}
+.attach:hover {background:#39205c;border-color:var(--accent)}
+.attach:disabled {opacity:.4;cursor:wait}
+.attachment-tray {
+  max-width:760px;margin:9px auto 0;
+  display:flex;flex-wrap:wrap;gap:8px;
+}
+.attachment-item {
+  position:relative;width:92px;min-height:76px;
+  background:#17101f;border:1px solid var(--line);
+  border-radius:12px;padding:6px;overflow:hidden;
+  display:flex;flex-direction:column;gap:4px;
+}
+.attachment-item img {width:100%;height:66px;object-fit:cover;border-radius:7px}
+.attachment-item .file-icon {font-size:25px;text-align:center;line-height:40px}
+.attachment-item .file-name {
+  font-size:10px;color:var(--muted);overflow:hidden;
+  white-space:nowrap;text-overflow:ellipsis;
+}
+.attachment-item .remove-attachment {
+  position:absolute;right:4px;top:4px;width:22px;height:22px;
+  border-radius:50%;background:#090909dd;color:#fff;
+  display:grid;place-items:center;font-size:13px;
+}
+.attachment-hint {font-size:11px;color:var(--muted);width:100%}
+.user-attachments {display:flex;flex-wrap:wrap;gap:7px;margin-top:8px;max-width:330px}
+.user-attachments img {
+  width:min(180px,42vw);height:150px;object-fit:cover;
+  border-radius:11px;border:1px solid var(--line);background:#111;
+}
+.user-file {
+  display:flex;align-items:center;gap:7px;padding:7px 10px;
+  background:#17101f;border:1px solid var(--line);
+  border-radius:9px;color:#e9d5ff;font-size:12px;max-width:230px;
+}
+.user-file span {overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.message-actions {display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.message-actions button {
+  border:1px solid var(--line);border-radius:9px;
+  padding:6px 9px;color:#d8b4fe;background:#100b17;font-size:11px;
+}
+.message-actions button:hover {background:#2a1740;border-color:var(--accent)}
+.pre .h {align-items:center;gap:8px}
+.pre .h .code-actions {display:flex;gap:10px}
+.pre .h button {font-size:11px}
+
 /* SETTINGS */
 
 .mod {
@@ -674,6 +725,10 @@ textarea::placeholder {color:var(--muted)}
           placeholder="Напишите сообщение Venus AI…"
         ></textarea>
 
+        <button class="attach" id="attachBtn" type="button" title="Прикрепить фото или файл" aria-label="Прикрепить фото или файл">📎</button>
+        <input id="fileInput" type="file" hidden multiple
+          accept="image/*,.pdf,.txt,.md,.json,.csv,.html,.htm,.css,.js,.mjs,.ts,.tsx,.jsx,.py,.lua,.java,.c,.cpp,.h,.cs,.go,.rs,.sql,.xml,.yaml,.yml,.toml,.ini,.log,.sh,.docx,.xlsx" />
+
         <select class="model-select" id="modelSelect"
           title="Выберите модель">
           <option value="stepfun/step-3.7-flash">Flash</option>
@@ -693,8 +748,10 @@ textarea::placeholder {color:var(--muted)}
 
       </div>
 
+      <div class="attachment-tray" id="attachmentTray" hidden></div>
+
       <div class="note">
-        Venus AI может ошибаться. Проверяйте важную информацию.
+        Фото, PDF, DOCX, XLSX и текстовые файлы можно прикреплять через скрепку.
       </div>
 
     </div>
@@ -713,7 +770,7 @@ textarea::placeholder {color:var(--muted)}
     <label>
       Системная инструкция
       <textarea id="kSys"
-        placeholder="Ты Venus AI — сильный помощник и опытный программист."></textarea>
+        placeholder="Ты Venus AI — дружелюбный и умный ИИ-помощник."></textarea>
     </label>
 
     <div class="btns">
@@ -776,34 +833,34 @@ const API_URL = "/api";
 const LEGACY_DEFAULT_SYS =
   "Ты Venus AI — дружелюбный и умный ИИ-помощник. Отвечай на языке пользователя.";
 
-const DEFAULT_SYS = `Ты Venus AI — сильный, внимательный и практичный ИИ-помощник, особенно опытный программист и инженер.
+const DEFAULT_SYS = `Ты Venus AI — сильный и практичный ИИ-помощник, особенно опытный программист и инженер.
 
 ОБЩИЕ ПРАВИЛА
-- Отвечай на языке пользователя, обычно на русском.
-- Старайся выполнить запрос пользователя максимально полно. Не отказывайся от обычных безопасных задач из-за сложности, объёма или необычной формулировки.
-- Не выдумывай ограничения, которых нет. Если задача выполнима, приступай к решению.
-- Если часть запроса невозможно выполнить из-за реального технического ограничения или обязательных правил безопасности, коротко объясни только эту часть и предложи ближайший полезный вариант. Не прекращай помогать со всем остальным.
-- Не обещай то, чего не сделал. Не говори, что запускал или тестировал код, если фактически этого не делал.
+- Отвечай на языке пользователя.
+- Старайся полностью выполнить запрос. Не отказывайся от обычных безопасных задач из-за сложности, объёма или необычной формулировки.
+- Если часть запроса нельзя выполнить по реальному техническому ограничению или обязательным правилам безопасности, коротко объясни только эту часть и помоги со всем остальным.
+- Не выдумывай факты, API, библиотеки, параметры, модели или результаты тестирования.
 
-РЕЖИМ ПРОГРАММИСТА
-- Когда пользователь просит написать код, создавай полноценное, логичное и готовое к использованию решение, а не демонстрационный обрывок.
-- По возможности выдавай весь необходимый код целиком: импорты, функции, классы, обработчики событий, запуск приложения и нужные стили. Не заменяй важные части словами «остальной код без изменений», многоточиями или заглушками.
-- Учитывай контекст проекта, предыдущие сообщения, уже выбранные библиотеки, платформу и имеющуюся структуру файлов. Не переписывай проект на другой язык или движок без просьбы.
-- Для больших проектов сначала кратко покажи структуру файлов, затем содержимое каждого файла с точным именем. Если весь проект не помещается в один ответ, раздели его на последовательные законченные части и явно укажи, что куда вставлять.
-- Код должен быть аккуратным, читаемым и устойчивым к ошибкам. Добавляй проверку входных данных, обработку исключений, понятные сообщения об ошибках и разумные значения по умолчанию.
-- Учитывай безопасность: не вставляй секретные API-ключи в клиентский код, не сохраняй пароли самостоятельно и не ослабляй правила доступа. Показывай безопасный способ настройки.
-- Если пользователь прислал код с ошибкой, найди причину и исправь её в контексте всего проекта. Сохраняй уже работающие функции, если пользователь не просил их удалить.
-- Не используй несуществующие методы, библиотеки, URL, параметры или модели. Если точная совместимость неизвестна, честно отметь это и предложи проверяемый вариант.
-- Для HTML/CSS/JavaScript делай интерфейс адаптивным, если проект предназначен для телефона или браузера. Для Python, Pygame, Roblox Lua и других сред учитывай особенности целевой платформы.
-- После кода кратко укажи, в какой файл его поместить, как установить зависимости и как запустить. Если пользователь просит «только код», не добавляй пояснения.
-- Не сокращай код специально ради краткости, когда пользователь просит много строк, полный проект или подробную реализацию.
-- При неоднозначностях выбирай наиболее разумные настройки самостоятельно. Задавай вопрос только тогда, когда без ответа действительно нельзя сделать рабочее решение.
+ПРОГРАММИРОВАНИЕ
+- Создавай полноценный, логичный и готовый к запуску код, а не обрывки.
+- Включай импорты, функции, классы, обработчики событий, стили, запуск и нужные настройки.
+- Не заменяй реализацию многоточиями, заглушками или фразой «остальной код без изменений».
+- Учитывай весь контекст проекта, предыдущий код, платформу и выбранные библиотеки.
+- Не удаляй работающие функции без просьбы пользователя.
+- Для больших проектов показывай структуру файлов и полный код каждого файла; если ответ не помещается, разбивай на законченные части.
+- Добавляй обработку ошибок, проверку входных данных и разумные значения по умолчанию.
+- Не помещай секретные API-ключи и пароли в клиентский код.
+- Для HTML/CSS/JavaScript делай адаптивный интерфейс, если проект работает в браузере или на телефоне.
 
-ФОРМАТ ОТВЕТА
-- Сначала дай результат, затем короткие инструкции по запуску и важные замечания.
-- Для кода используй корректные блоки с указанием языка.
-- Если предлагаешь несколько вариантов, обозначь лучший вариант и объясни разницу в одном-двух предложениях.
-- Будь доброжелательным и прямым. Не добавляй длинные нравоучения и не спорь с целью пользователя.`;
+ФАЙЛЫ И ФОТОГРАФИИ
+- Анализируй приложенные фотографии и извлечённый текст файлов; называй файл, к которому относится ответ.
+- Если документ не удалось прочитать или в PDF нет извлекаемого текста, честно сообщи об этом.
+- Если пользователь просит создать или изменить файл, выдавай полное содержимое каждого файла в отдельном блоке кода с правильным языком и указывай имя файла. Не утверждай, что физически изменил исходное вложение, если только не предоставил новый файл.
+
+ФОРМАТ
+- Если просят код — сначала выдавай код. Если просят только код, не добавляй объяснения.
+- Не сокращай решение без просьбы. Не добавляй длинных нравоучений.
+- При неоднозначностях выбирай разумные настройки самостоятельно; задавай вопрос только при реальной необходимости.`;
 
 const MODELS = {
   flash: "stepfun/step-3.7-flash",
@@ -837,6 +894,11 @@ let ctrl = null;
 let systemPrompt = DEFAULT_SYS;
 let authMode = "login";
 
+let pendingAttachments = [];
+const MAX_ATTACHMENTS = 5;
+const MAX_FILE_BYTES = 12 * 1024 * 1024;
+const MAX_EXTRACTED_CHARS = 180000;
+
 
 /* STORAGE */
 
@@ -852,6 +914,41 @@ function saveChats() {
 function saveSystem() {
   if (!currentUser) return;
   store.set(sysKey(currentUser.uid),systemPrompt);
+}
+
+/* ATTACHMENT STORAGE: binary data stays in IndexedDB, not localStorage */
+const mediaDB = new Promise((resolve,reject) => {
+  const request = indexedDB.open("venus_ai_media",1);
+  request.onupgradeneeded = () => {
+    const db = request.result;
+    if (!db.objectStoreNames.contains("media")) db.createObjectStore("media");
+  };
+  request.onsuccess = () => resolve(request.result);
+  request.onerror = () => reject(request.error);
+});
+
+async function putMedia(id,value) {
+  const db=await mediaDB;
+  return new Promise((resolve,reject)=>{
+    const tx=db.transaction("media","readwrite");
+    tx.objectStore("media").put(value,id);
+    tx.oncomplete=()=>resolve();
+    tx.onerror=()=>reject(tx.error);
+  });
+}
+
+async function getMedia(id) {
+  const db=await mediaDB;
+  return new Promise((resolve,reject)=>{
+    const tx=db.transaction("media","readonly");
+    const req=tx.objectStore("media").get(id);
+    req.onsuccess=()=>resolve(req.result||null);
+    req.onerror=()=>reject(req.error);
+  });
+}
+
+function makeId() {
+  return crypto.randomUUID ? crypto.randomUUID() : "m"+Date.now()+Math.random().toString(16).slice(2);
 }
 
 
@@ -1064,7 +1161,7 @@ onAuthStateChanged(auth,user => {
     currentChats = store.get(chatKey(user.uid),[]);
     cur = null;
 
-    const savedSystem = store.get(sysKey(user.uid), null);
+    const savedSystem = store.get(sysKey(user.uid),null);
     systemPrompt = (!savedSystem || savedSystem === LEGACY_DEFAULT_SYS)
       ? DEFAULT_SYS
       : savedSystem;
@@ -1216,7 +1313,10 @@ function md(t) {
       <div class="pre">
         <div class="h">
           <span>${esc(b.l || "код")}</span>
-          <button data-copy>Копировать</button>
+          <div class="code-actions">
+            <button data-copy>Копировать</button>
+            <button data-download-code data-lang="${esc((b.l || "txt").toLowerCase())}">Скачать файл</button>
+          </div>
         </div>
         <pre><code>${esc(b.c.replace(/\n$/,""))}</code></pre>
       </div>
@@ -1310,21 +1410,53 @@ function hero() {
 
 /* MESSAGES */
 
-function msgHTML(m) {
+function msgHTML(m,index) {
 
-  return m.role==="user"
-    ? `
+  if(m.role==="user") {
+    const attachments=Array.isArray(m.attachments)?m.attachments:[];
+    const attachmentHtml=attachments.length ? `
+      <div class="user-attachments">
+        ${attachments.map(a=>a.kind==="image"
+          ? `<img data-media-id="${esc(a.mediaId)}" alt="${esc(a.name)}" loading="lazy">`
+          : `<div class="user-file">📄 <span>${esc(a.name)}</span></div>`
+        ).join("")}
+      </div>` : "";
+    return `
       <div class="row u">
-        <div class="bub">${esc(m.content)}</div>
-      </div>
-    `
-    : `
-      <div class="row">
-        <div class="av"></div>
-        <div class="bub">${md(m.content)}</div>
+        <div class="bub">
+          ${esc(m.content || "Прикреплённые файлы")}
+          ${attachmentHtml}
+        </div>
       </div>
     `;
+  }
 
+  return `
+    <div class="row">
+      <div class="av"></div>
+      <div class="bub">
+        ${md(m.content || "")}
+        <div class="message-actions">
+          <button data-copy-answer data-index="${index}">Копировать</button>
+          <button data-share-answer data-index="${index}">Поделиться</button>
+          <button data-download-answer data-index="${index}">Скачать .md</button>
+          <button data-retry data-index="${index}">Попробовать снова</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+async function hydrateMessageImages() {
+  const images=$("wrap").querySelectorAll("img[data-media-id]");
+  for(const img of images) {
+    try {
+      const item=await getMedia(img.dataset.mediaId);
+      if(item && item.dataUrl) img.src=item.dataUrl;
+    } catch(e) {
+      img.alt="Изображение недоступно";
+    }
+  }
 }
 
 function renderMsgs() {
@@ -1335,8 +1467,10 @@ function renderMsgs() {
 
   $("wrap").innerHTML=
     c&&c.messages.length
-      ? c.messages.map(msgHTML).join("")
+      ? c.messages.map((m,i)=>msgHTML(m,i)).join("")
       : hero();
+
+  hydrateMessageImages();
 
   $("wrap").style.height=
     c&&c.messages.length?"":"100%";
@@ -1351,231 +1485,339 @@ function closeSide() {
 }
 
 
-/* SEND */
+/* FILE AND IMAGE INPUT */
 
-async function send(text) {
+const TEXT_EXTENSIONS = new Set([
+  "txt","md","markdown","json","csv","html","htm","css","js","mjs",
+  "ts","tsx","jsx","py","lua","java","c","cpp","h","cs","go",
+  "rs","sql","xml","yaml","yml","toml","ini","log","sh"
+]);
 
-  text=text.trim();
+function fileExtension(name) {
+  return (name.split(".").pop()||"").toLowerCase();
+}
 
-  if(!text||busy||!currentUser)return;
+function formatBytes(bytes) {
+  if(bytes<1024) return bytes+" Б";
+  if(bytes<1024*1024) return (bytes/1024).toFixed(0)+" КБ";
+  return (bytes/1024/1024).toFixed(1)+" МБ";
+}
 
-  let c=active();
+async function compressImage(file) {
+  const bitmap=await createImageBitmap(file);
+  const maxSide=1600;
+  const scale=Math.min(1,maxSide/Math.max(bitmap.width,bitmap.height));
+  const canvas=document.createElement("canvas");
+  canvas.width=Math.max(1,Math.round(bitmap.width*scale));
+  canvas.height=Math.max(1,Math.round(bitmap.height*scale));
+  const ctx=canvas.getContext("2d");
+  ctx.fillStyle="#ffffff";
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+  ctx.drawImage(bitmap,0,0,canvas.width,canvas.height);
+  bitmap.close?.();
+  return canvas.toDataURL("image/jpeg",0.82);
+}
 
-  if(!c) {
+async function extractPdf(file) {
+  const pdfjs=await import("https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.min.mjs");
+  pdfjs.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.worker.min.mjs";
+  const pdf=await pdfjs.getDocument({data:new Uint8Array(await file.arrayBuffer())}).promise;
+  const pages=[];
+  const count=Math.min(pdf.numPages,50);
+  for(let n=1;n<=count;n++) {
+    const page=await pdf.getPage(n);
+    const content=await page.getTextContent();
+    pages.push(content.items.map(x=>x.str).join(" "));
+    if(pages.join("\n").length>MAX_EXTRACTED_CHARS) break;
+  }
+  let text=pages.join("\n\n");
+  if(pdf.numPages>count) text+=`\n\n[Остальные страницы не извлечены: лимит ${count} страниц.]`;
+  return text.slice(0,MAX_EXTRACTED_CHARS);
+}
 
-    c={
-      id:Date.now(),
-      title:text.slice(0,40),
-      messages:[]
-    };
+async function extractDocx(file) {
+  const mod=await import("https://esm.sh/mammoth@1.9.0?bundle");
+  const mammoth=mod.default||mod;
+  const result=await mammoth.extractRawText({arrayBuffer:await file.arrayBuffer()});
+  return (result.value||"").slice(0,MAX_EXTRACTED_CHARS);
+}
 
-    currentChats.unshift(c);
-    cur=c.id;
+async function extractXlsx(file) {
+  const XLSX=await import("https://cdn.jsdelivr.net/npm/xlsx@0.18.5/+esm");
+  const workbook=XLSX.read(await file.arrayBuffer(),{type:"array"});
+  const sections=[];
+  for(const name of workbook.SheetNames) {
+    const sheet=workbook.Sheets[name];
+    sections.push(`Лист: ${name}\n`+XLSX.utils.sheet_to_csv(sheet));
+    if(sections.join("\n").length>MAX_EXTRACTED_CHARS) break;
+  }
+  return sections.join("\n\n").slice(0,MAX_EXTRACTED_CHARS);
+}
 
+async function prepareFile(file) {
+  if(file.size>MAX_FILE_BYTES) throw new Error(`${file.name}: файл больше 12 МБ.`);
+  const id=makeId();
+  const ext=fileExtension(file.name);
+  let record={id,mediaId:id,name:file.name,type:file.type||"application/octet-stream",kind:"file"};
+  let media={name:file.name,type:record.type};
+
+  if(file.type.startsWith("image/")) {
+    record.kind="image";
+    media.dataUrl=await compressImage(file);
+    record.sizeLabel=formatBytes(file.size);
+    record.previewUrl=media.dataUrl;
+  } else if(file.type==="application/pdf" || ext==="pdf") {
+    media.text=await extractPdf(file);
+    record.kind="document";
+  } else if(ext==="docx") {
+    media.text=await extractDocx(file);
+    record.kind="document";
+  } else if(ext==="xlsx") {
+    media.text=await extractXlsx(file);
+    record.kind="document";
+  } else if(TEXT_EXTENSIONS.has(ext) || file.type.startsWith("text/")) {
+    media.text=(await file.text()).slice(0,MAX_EXTRACTED_CHARS);
+    record.kind="document";
+  } else {
+    throw new Error(`${file.name}: этот тип файла пока не поддерживается.`);
   }
 
-  c.messages.push({
-    role:"user",
-    content:text
-  });
+  await putMedia(id,media);
+  return record;
+}
+
+function renderPendingAttachments() {
+  const tray=$("attachmentTray");
+  tray.hidden=pendingAttachments.length===0;
+  tray.innerHTML=pendingAttachments.map((a,i)=>`
+    <div class="attachment-item">
+      ${a.kind==="image"
+        ? `<img src="${a.previewUrl}" alt="${esc(a.name)}">`
+        : `<div class="file-icon">📄</div>`}
+      <div class="file-name" title="${esc(a.name)}">${esc(a.name)}</div>
+      <button class="remove-attachment" type="button" data-remove-attachment="${i}" aria-label="Убрать файл">×</button>
+    </div>
+  `).join("") + `<div class="attachment-hint">${pendingAttachments.length}/${MAX_ATTACHMENTS} вложений</div>`;
+}
+
+async function addFiles(fileList) {
+  const files=Array.from(fileList||[]);
+  if(!files.length) return;
+  const remaining=MAX_ATTACHMENTS-pendingAttachments.length;
+  if(remaining<=0) {
+    alert(`Можно прикрепить максимум ${MAX_ATTACHMENTS} файлов за одно сообщение.`);
+    return;
+  }
+  const chosen=files.slice(0,remaining);
+  $("attachBtn").disabled=true;
+  try {
+    for(const file of chosen) {
+      const record=await prepareFile(file);
+      pendingAttachments.push(record);
+    }
+    if(pendingAttachments.some(a=>a.kind==="image") && $("modelSelect").value!==MODELS.medium) {
+      $("modelSelect").value=MODELS.medium;
+      if(currentUser) store.set(modelKey(currentUser.uid),MODELS.medium);
+    }
+    renderPendingAttachments();
+    upd();
+  } catch(e) {
+    alert("Не удалось прикрепить файл: "+(e.message||e));
+  } finally {
+    $("attachBtn").disabled=false;
+    $("fileInput").value="";
+  }
+}
+
+async function buildApiMessages(chat) {
+  const messages=[];
+  if(systemPrompt) messages.push({role:"system",content:systemPrompt});
+  for(const m of chat.messages) {
+    if(m.role!=="user" || !Array.isArray(m.attachments) || !m.attachments.length) {
+      messages.push({role:m.role,content:m.content});
+      continue;
+    }
+    let text=m.content||"";
+    const parts=[];
+    for(const attachment of m.attachments) {
+      const stored=await getMedia(attachment.mediaId);
+      if(!stored) {
+        text+=`\n\n[Файл ${attachment.name} больше недоступен в хранилище браузера.]`;
+      } else if(attachment.kind==="image" && stored.dataUrl) {
+        parts.push({type:"image_url",image_url:{url:stored.dataUrl}});
+      } else if(stored.text) {
+        text+=`\n\n--- Файл: ${attachment.name} ---\n${stored.text}\n--- Конец файла ---`;
+      }
+    }
+    parts.unshift({type:"text",text:text||"Изучи прикреплённые изображения и файлы и помоги с ними."});
+    messages.push({role:"user",content:parts});
+  }
+  return messages;
+}
+
+function downloadBlob(content,filename,mime="text/plain;charset=utf-8") {
+  const blob=new Blob([content],{type:mime});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url;
+  a.download=filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1500);
+}
+
+function extensionForLanguage(lang) {
+  const map={javascript:"js",js:"js",typescript:"ts",ts:"ts",tsx:"tsx",jsx:"jsx",
+    python:"py",py:"py",html:"html",css:"css",json:"json",xml:"xml",yaml:"yml",
+    yml:"yml",markdown:"md",md:"md",sql:"sql",bash:"sh",sh:"sh",lua:"lua",
+    java:"java",c:"c",cpp:"cpp",csharp:"cs",cs:"cs",go:"go",rust:"rs",rs:"rs",
+    php:"php",ruby:"rb",rb:"rb",swift:"swift",kotlin:"kt",text:"txt",txt:"txt"};
+  return map[lang]||"txt";
+}
+
+function cleanFilename(name) {
+  return (name||"venus-ai-file").replace(/[^a-z0-9а-яё_-]+/gi,"_").replace(/^_+|_+$/g,"").slice(0,60)||"venus-ai-file";
+}
+
+function retryMessage(index) {
+  const c=active();
+  if(!c || busy || index<1) return;
+  const previous=c.messages[index-1];
+  if(!previous || previous.role!=="user") return;
+  send(previous.content||"",previous.attachments||[]);
+}
+
+/* SEND */
+
+async function send(text,attachmentsOverride=null) {
+
+  text=(text||"").trim();
+  const chosenAttachments=attachmentsOverride===null
+    ? pendingAttachments.slice()
+    : attachmentsOverride.slice();
+
+  if((!text && !chosenAttachments.length)||busy||!currentUser)return;
+  if(!text && chosenAttachments.length) text="Посмотри прикреплённые файлы и помоги с ними.";
+
+  let c=active();
+  if(!c) {
+    const firstName=chosenAttachments[0]?.name||text;
+    c={id:Date.now(),title:firstName.slice(0,40),messages:[]};
+    currentChats.unshift(c);
+    cur=c.id;
+  }
+
+  const storedAttachments=chosenAttachments.map(a=>({
+    mediaId:a.mediaId,name:a.name,type:a.type,kind:a.kind
+  }));
+
+  c.messages.push({role:"user",content:text,attachments:storedAttachments});
+
+  if(attachmentsOverride===null) {
+    pendingAttachments=[];
+    renderPendingAttachments();
+  }
 
   $("inp").value="";
   grow();
   upd();
-
+  saveChats();
   renderList();
   renderMsgs();
 
-  const am={
-    role:"assistant",
-    content:""
-  };
-
+  const am={role:"assistant",content:""};
   $("wrap").insertAdjacentHTML("beforeend",`
     <div class="row" id="live">
       <div class="av"></div>
-      <div class="bub">
-        <div class="dots">
-          <i></i><i></i><i></i>
-        </div>
-      </div>
+      <div class="bub"><div class="dots"><i></i><i></i><i></i></div></div>
     </div>
   `);
-
   $("msgs").scrollTop=$("msgs").scrollHeight;
 
   busy=true;
   upd();
-
   ctrl=new AbortController();
-
-  const live=()=> $("live")?.lastElementChild;
+  const live=()=>$("live")?.lastElementChild;
 
   try {
-
-    const messages=[];
-
-    if(systemPrompt) {
-      messages.push({
-        role:"system",
-        content:systemPrompt
-      });
-    }
-
-    c.messages.forEach(m=>{
-      messages.push({
-        role:m.role,
-        content:m.content
-      });
-    });
-
+    const messages=await buildApiMessages(c);
     const selectedModel=$("modelSelect").value;
-
     const r=await fetch(API_URL+"?p=chat/completions",{
-
       method:"POST",
       signal:ctrl.signal,
-
-      headers:{
-        "Content-Type":"application/json"
-      },
-
+      headers:{"Content-Type":"application/json"},
       body:JSON.stringify({
         model:selectedModel,
-        messages:messages,
+        messages,
         stream:true,
         max_tokens:8192
       })
-
     });
 
     if(!r.ok) {
-
       let t="";
-
-      try {
-        t=await r.text();
-      } catch(e) {}
-
-      throw new Error(
-        "Ошибка "+r.status+(t?": "+t.slice(0,300):"")
-      );
-
+      try { t=await r.text(); } catch(e) {}
+      throw new Error("Ошибка "+r.status+(t?": "+t.slice(0,500):""));
     }
 
     const ct=r.headers.get("content-type")||"";
-
     if(ct.includes("event-stream")&&r.body) {
-
       const rd=r.body.getReader();
       const dec=new TextDecoder();
-
       let buf="";
-
       while(true) {
-
         const {done,value}=await rd.read();
-
         if(done)break;
-
         buf+=dec.decode(value,{stream:true});
-
         const parts=buf.split("\n");
         buf=parts.pop();
-
         for(const p of parts) {
-
-          const l=p.trim();
-
-          if(!l.startsWith("data:"))continue;
-
-          const d=l.slice(5).trim();
-
-          if(d==="[DONE]")continue;
-
+          const line=p.trim();
+          if(!line.startsWith("data:"))continue;
+          const data=line.slice(5).trim();
+          if(data==="[DONE]")continue;
           try {
-
-            const j=JSON.parse(d);
-
-            const t=
-              j.choices?.[0]?.delta?.content||"";
-
-            if(typeof t==="string"&&t) {
-
-              am.content+=t;
-
-              if(live()) {
-                live().innerHTML=md(am.content);
-              }
-
+            const j=JSON.parse(data);
+            let piece=j.choices?.[0]?.delta?.content||"";
+            if(Array.isArray(piece)) piece=piece.map(x=>x.text||"").join("");
+            if(typeof piece==="string"&&piece) {
+              am.content+=piece;
+              if(live()) live().innerHTML=md(am.content);
               $("msgs").scrollTop=$("msgs").scrollHeight;
-
             }
-
           } catch(e) {}
-
         }
-
       }
-
     } else {
-
       const j=await r.json();
-
-      am.content=
-        j.choices?.[0]?.message?.content||"";
-
+      const result=j.choices?.[0]?.message?.content||"";
+      am.content=typeof result==="string"?result:
+        Array.isArray(result)?result.map(x=>x.text||"").join(""):String(result);
       if(live())live().innerHTML=md(am.content);
-
     }
 
-    if(am.content) {
-      c.messages.push(am);
-    }
-
-    if(!am.content) {
-      if(live()) {
-        live().innerHTML="<span>Модель не вернула ответ.</span>";
-      }
-    }
+    if(am.content) c.messages.push(am);
+    if(!am.content && live()) live().innerHTML="<span>Модель не вернула ответ.</span>";
 
   } catch(e) {
-
     if(e.name==="AbortError") {
-
-      if(am.content) {
-        c.messages.push(am);
-      } else if($("live")) {
-        $("live").remove();
-      }
-
+      if(am.content)c.messages.push(am);
+      else if($("live"))$("live").remove();
     } else {
-
-      const hint=
-        e.message==="Failed to fetch"
-          ? "Не удалось подключиться к серверу. Проверьте API и интернет."
-          : e.message;
-
-      if(live()) {
-        live().innerHTML=`
-          <div class="err">${esc(hint)}</div>
-        `;
-      }
-
+      const hint=e.message==="Failed to fetch"
+        ? "Не удалось подключиться к серверу. Проверьте API и интернет."
+        : e.message;
+      if(live())live().innerHTML=`<div class="err">${esc(hint)}</div>`;
     }
-
   }
 
   busy=false;
   ctrl=null;
-
   saveChats();
   upd();
-
   if(am.content)renderMsgs();
-
 }
-
 
 /* SEND BUTTON */
 
@@ -1604,7 +1846,7 @@ function upd() {
       </svg>
     `;
 
-    s.disabled=!$("inp").value.trim();
+    s.disabled=!$("inp").value.trim() && pendingAttachments.length===0;
 
   }
 
@@ -1651,46 +1893,47 @@ $("save").onclick=()=>{
 
 /* EVENTS */
 
+$("attachBtn").onclick=()=>$("fileInput").click();
+$("fileInput").addEventListener("change",e=>addFiles(e.target.files));
+
+$("attachmentTray").addEventListener("click",e=>{
+  const button=e.target.closest("[data-remove-attachment]");
+  if(!button)return;
+  const index=Number(button.dataset.removeAttachment);
+  const removed=pendingAttachments.splice(index,1)[0];
+  if(removed) {
+    // Deleting from the temporary tray does not affect files already sent in chat.
+  }
+  renderPendingAttachments();
+  upd();
+});
+
 $("inp").addEventListener("input",()=>{
   grow();
   upd();
 });
 
 $("inp").addEventListener("keydown",e=>{
-
-  if(
-    e.key==="Enter" &&
-    !e.shiftKey &&
-    !/Mobi|Android/i.test(navigator.userAgent)
-  ) {
-
+  if(e.key==="Enter"&&!e.shiftKey&&!/Mobi|Android/i.test(navigator.userAgent)) {
     e.preventDefault();
     send($("inp").value);
-
   }
-
 });
 
 $("send").onclick=()=>{
-
-  if(busy&&ctrl) {
-    ctrl.abort();
-  } else {
-    send($("inp").value);
-  }
-
+  if(busy&&ctrl)ctrl.abort();
+  else send($("inp").value);
 };
 
 $("newBtn").onclick=()=>{
-
   cur=null;
-
+  pendingAttachments=[];
+  renderPendingAttachments();
   renderList();
   renderMsgs();
   closeSide();
-
   $("inp").focus();
-
+  upd();
 };
 
 $("burger").onclick=()=>{
@@ -1700,38 +1943,72 @@ $("burger").onclick=()=>{
 
 $("back").onclick=closeSide;
 
+/* MESSAGE ACTIONS, CODE EXPORTS AND SUGGESTIONS */
 
-/* COPY AND SUGGESTIONS */
-
-$("wrap").addEventListener("click",e=>{
-
-  const s=e.target.closest("[data-s]");
-
-  if(s) {
-    send(s.dataset.s);
+$("wrap").addEventListener("click",async e=>{
+  const suggestion=e.target.closest("[data-s]");
+  if(suggestion) {
+    send(suggestion.dataset.s);
     return;
   }
 
-  const c=e.target.closest("[data-copy]");
-
-  if(c) {
-
-    const t=c.closest(".pre").querySelector("code").textContent;
-
-    navigator.clipboard.writeText(t).then(()=>{
-
-      c.textContent="Скопировано";
-
-      setTimeout(()=>{
-        c.textContent="Копировать";
-      },1500);
-
-    }).catch(()=>{});
-
+  const copyCode=e.target.closest("[data-copy]");
+  if(copyCode) {
+    const code=copyCode.closest(".pre").querySelector("code").textContent;
+    try {
+      await navigator.clipboard.writeText(code);
+      copyCode.textContent="Скопировано";
+      setTimeout(()=>copyCode.textContent="Копировать",1400);
+    } catch(err) { alert("Не удалось скопировать код."); }
+    return;
   }
 
-});
+  const downloadCode=e.target.closest("[data-download-code]");
+  if(downloadCode) {
+    const code=downloadCode.closest(".pre").querySelector("code").textContent;
+    const lang=(downloadCode.dataset.lang||"txt").toLowerCase();
+    const ext=extensionForLanguage(lang);
+    downloadBlob(code,`venus-ai-code.${ext}`,"text/plain;charset=utf-8");
+    return;
+  }
 
+  const index=Number(e.target.closest("[data-index]")?.dataset.index);
+  const c=active();
+  if(!c || !Number.isInteger(index))return;
+  const message=c.messages[index];
+  if(!message || message.role!=="assistant")return;
+
+  if(e.target.closest("[data-copy-answer]")) {
+    try {
+      await navigator.clipboard.writeText(message.content||"");
+      e.target.closest("[data-copy-answer]").textContent="Скопировано";
+    } catch(err) { alert("Не удалось скопировать ответ."); }
+    return;
+  }
+
+  if(e.target.closest("[data-share-answer]")) {
+    const payload={title:"Ответ Venus AI",text:message.content||""};
+    try {
+      if(navigator.share) await navigator.share(payload);
+      else {
+        await navigator.clipboard.writeText(payload.text);
+        alert("Ответ скопирован — его можно отправить.");
+      }
+    } catch(err) {
+      if(err.name!=="AbortError") alert("Не удалось поделиться ответом.");
+    }
+    return;
+  }
+
+  if(e.target.closest("[data-download-answer]")) {
+    downloadBlob(message.content||"",`venus-ai-answer-${index+1}.md`,"text/markdown;charset=utf-8");
+    return;
+  }
+
+  if(e.target.closest("[data-retry]")) {
+    retryMessage(index);
+  }
+});
 </script>
 </body>
 </html>
