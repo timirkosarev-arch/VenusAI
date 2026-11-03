@@ -66,6 +66,17 @@ button {color:inherit;cursor:pointer}
   background:#101010;
   box-shadow:0 15px 70px #000;
 }
+.auth-back {
+  display:block;
+  margin:0 0 14px;
+  padding:7px 10px;
+  border:1px solid var(--line);
+  border-radius:9px;
+  background:#151019;
+  color:#d8b4fe;
+  font-size:13px;
+}
+.auth-back:hover {background:#211333}
 .auth-head {text-align:center;margin-bottom:22px}
 .auth-head .logo {
   width:76px;height:76px;
@@ -226,6 +237,15 @@ button {color:inherit;cursor:pointer}
   color:#d8b4fe;
   text-decoration:none;
 }
+.register-guest {
+  width:100%;
+  justify-content:center;
+  margin:10px 0 4px;
+  border:1px solid #493064;
+  color:#e9d5ff;
+  background:#211333;
+}
+.register-guest:hover {background:#32194e;border-color:#72509a}
 .account {
   display:flex;
   align-items:center;
@@ -400,14 +420,15 @@ button {color:inherit;cursor:pointer}
   max-width:760px;
   margin:0 auto;
   background:var(--panel);
-  border:1px solid var(--line);
-  border-radius:26px;
+  border:1px solid #33243f;
+  border-radius:21px;
   display:flex;
   align-items:flex-end;
-  gap:7px;
-  padding:8px 8px 8px 18px;
+  gap:6px;
+  padding:5px 7px 5px 14px;
+  box-shadow:none;
 }
-.box:focus-within {border-color:var(--accent)}
+.box:focus-within {border-color:#72509a;box-shadow:none}
 textarea {
   flex:1;
   background:none;
@@ -415,10 +436,11 @@ textarea {
   outline:0;
   color:var(--text);
   resize:none;
-  max-height:200px;
+  max-height:160px;
   min-width:0;
-  padding:6px 0;
-  line-height:1.5;
+  min-height:28px;
+  padding:4px 0;
+  line-height:1.45;
 }
 textarea::placeholder {color:var(--muted)}
 
@@ -596,6 +618,8 @@ textarea::placeholder {color:var(--muted)}
 <div class="auth-screen" id="authScreen" hidden>
   <div class="auth-card">
 
+    <button class="auth-back" id="authBack" type="button">← Назад в чат</button>
+
     <div class="auth-head">
       <div class="logo"></div>
       <h1>Venus AI</h1>
@@ -685,6 +709,10 @@ textarea::placeholder {color:var(--muted)}
 
       </div>
 
+      <button class="new register-guest" id="registerBtn" type="button">
+        Войти / Регистрация
+      </button>
+
       <div class="account">
         <div class="account-avatar"></div>
 
@@ -730,9 +758,22 @@ textarea::placeholder {color:var(--muted)}
           accept="image/*,.pdf,.txt,.md,.json,.csv,.html,.htm,.css,.js,.mjs,.ts,.tsx,.jsx,.py,.lua,.java,.c,.cpp,.h,.cs,.go,.rs,.sql,.xml,.yaml,.yml,.toml,.ini,.log,.sh,.docx,.xlsx" />
 
         <select class="model-select" id="modelSelect"
-          title="Выберите модель">
-          <option value="stepfun/step-3.7-flash">Flash</option>
-          <option value="nvidia/nemotron-3.5-super-vl:free">Medium</option>
+          title="Автоматический резерв моделей или выбор приоритетной модели">
+          <option value="__venus_auto_pool__">Авто · все модели</option>
+          <option value="cohere/north-mini-code:free">North Mini Code</option>
+          <option value="recursive/flint-v1.0:free">Flint</option>
+          <option value="meituan/longcat-2.0:free">LongCat 2.0</option>
+          <option value="inclusionai/ling-3.1-flash:free">Ling 3.1 Flash</option>
+          <option value="tencent/hy3:free">Hy3</option>
+          <option value="xingchen-agi/xing4.0-29b-a4b:free">Xing4.0</option>
+          <option value="nvidia/nemotron-3.5-super-vl:free">Nemotron Super VL</option>
+          <option value="dots-studio/dots-3-note-preview:free">Dots3 Note</option>
+          <option value="liquid/lfm-2.5-2.6b:free">LFM 2.5</option>
+          <option value="nvidia/nemotron-3.5-lightning:free">Nemotron Lightning</option>
+          <option value="thinkingmachines/inkling-small:free">Inkling Small</option>
+          <option value="nvidia/nemotron-3-ultra-550b-a55b:free">Nemotron Ultra</option>
+          <option value="google/gemma-4-26b-a4b-it:free">Gemma 4 26B</option>
+          <option value="google/gemma-4-31b-it:free">Gemma 4 31B</option>
         </select>
 
         <button class="send" id="send" disabled
@@ -752,6 +793,7 @@ textarea::placeholder {color:var(--muted)}
 
       <div class="note">
         Фото, PDF, DOCX, XLSX и текстовые файлы можно прикреплять через скрепку.
+        В режиме «Авто» используется резерв моделей, но ответ всегда один.
       </div>
 
     </div>
@@ -863,9 +905,42 @@ const DEFAULT_SYS = `Ты Venus AI — сильный и практичный И
 - При неоднозначностях выбирай разумные настройки самостоятельно; задавай вопрос только при реальной необходимости.`;
 
 const MODELS = {
-  flash: "stepfun/step-3.7-flash",
+  auto: "__venus_auto_pool__",
+  flash: "cohere/north-mini-code:free",
   medium: "nvidia/nemotron-3.5-super-vl:free"
 };
+
+// Free OpenRouter models, ordered by the preferred fallback priority.
+// The API will use the first available model and return ONE answer.
+const FREE_MODEL_POOL = [
+  "cohere/north-mini-code:free",
+  "recursive/flint-v1.0:free",
+  "meituan/longcat-2.0:free",
+  "inclusionai/ling-3.1-flash:free",
+  "tencent/hy3:free",
+  "xingchen-agi/xing4.0-29b-a4b:free",
+  "nvidia/nemotron-3.5-super-vl:free",
+  "dots-studio/dots-3-note-preview:free",
+  "liquid/lfm-2.5-2.6b:free",
+  "nvidia/nemotron-3.5-lightning:free",
+  "thinkingmachines/inkling-small:free",
+  "nvidia/nemotron-3-ultra-550b-a55b:free",
+  "google/gemma-4-26b-a4b-it:free",
+  "google/gemma-4-31b-it:free",
+  "openrouter/free"
+];
+
+// Restrict image prompts to models with confirmed image input support.
+const IMAGE_MODEL_POOL = [
+  "nvidia/nemotron-3.5-super-vl:free",
+  "google/gemma-4-31b-it:free",
+  "google/gemma-4-26b-a4b-it:free"
+];
+
+const ALL_MODEL_VALUES = new Set([
+  MODELS.auto,
+  ...FREE_MODEL_POOL
+]);
 
 const store = {
 
@@ -906,16 +981,11 @@ const chatKey = uid => "venus_chats_" + uid;
 const sysKey = uid => "venus_sys_" + uid;
 const modelKey = uid => "venus_model_" + uid;
 
-// Удаляем старые сохранённые истории от предыдущих версий приложения.
-try {
-  for (const key of Object.keys(localStorage)) {
-    if (key.startsWith("venus_chats_")) localStorage.removeItem(key);
-  }
-} catch(e) {}
-
 function saveChats() {
-  // История чатов существует только в оперативной памяти вкладки.
-  // После перезагрузки страницы или её закрытия она исчезает.
+  // Гостевые чаты не сохраняются. История сохраняется отдельно для каждого
+  // вошедшего аккаунта и появляется после следующего входа в этот аккаунт.
+  if (!currentUser || currentUser.uid === "guest") return;
+  store.set(chatKey(currentUser.uid), currentChats);
 }
 
 function saveSystem() {
@@ -1126,6 +1196,7 @@ try {
 $("logoutBtn").onclick = async () => {
 
   try {
+    saveChats();
     await signOut(auth);
   } catch(e) {
     alert(firebaseError(e));
@@ -1134,24 +1205,36 @@ $("logoutBtn").onclick = async () => {
 };
 
 
-/* AUTH STATE — REGISTRATION IS OPTIONAL */
+/* AUTH STATE — GUEST CHAT + ACCOUNT HISTORY */
 let authStateInitialized = false;
 onAuthStateChanged(auth,user => {
 
+  const previousUser = currentUser;
   const nextUser = user || {uid:"guest",displayName:"Гость",email:""};
-  const accountChanged = authStateInitialized && currentUser.uid !== nextUser.uid;
+  const accountChanged = authStateInitialized && previousUser.uid !== nextUser.uid;
+  const temporaryGuestChats = previousUser?.uid === "guest" ? currentChats.slice() : [];
   currentUser = nextUser;
 
-  // Всегда открываем приложение. Аккаунт не требуется.
-  $("authScreen").hidden = true;
-  $("app").hidden = false;
-
-  // При смене аккаунта очищаем текущую историю в памяти.
-  if (accountChanged) {
-    currentChats = [];
-    cur = null;
+  if (!authStateInitialized || accountChanged) {
+    if (user) {
+      const savedChats = store.get(chatKey(user.uid),[]);
+      const savedIds = new Set(savedChats.map(c=>c.id));
+      currentChats = [
+        ...temporaryGuestChats.filter(c=>!savedIds.has(c.id)),
+        ...savedChats
+      ];
+      cur = currentChats[0]?.id ?? null;
+      saveChats();
+    } else {
+      currentChats = [];
+      cur = null;
+    }
   }
   authStateInitialized = true;
+
+  // The chat itself is always available. Authentication is optional.
+  $("authScreen").hidden = true;
+  $("app").hidden = false;
 
   const settingsId = currentUser.uid;
   const savedSystem = store.get(sysKey(settingsId),null);
@@ -1160,21 +1243,19 @@ onAuthStateChanged(auth,user => {
     : savedSystem;
   if (!savedSystem || savedSystem === LEGACY_DEFAULT_SYS) saveSystem();
 
-  const selectedModel = store.get(
-    modelKey(settingsId),
-    MODELS.flash
-  );
-
-  $("modelSelect").value =
-    Object.values(MODELS).includes(selectedModel)
-      ? selectedModel
-      : MODELS.flash;
+  const selectedModel = store.get(modelKey(settingsId),MODELS.auto);
+  $("modelSelect").value = ALL_MODEL_VALUES.has(selectedModel)
+    ? selectedModel
+    : MODELS.auto;
 
   $("accountName").textContent = user
     ? (user.displayName || "Пользователь")
     : "Гость";
   $("accountEmail").textContent = user ? (user.email || "") : "Без регистрации";
   $("logoutBtn").hidden = !user;
+  $("registerBtn").hidden = !!user;
+  $("list").hidden = !user;
+  $("newBtn").textContent = user ? "＋ Новый чат" : "＋ Новый чат";
 
   $("kSys").value = systemPrompt;
 
@@ -1183,17 +1264,24 @@ onAuthStateChanged(auth,user => {
   upd();
 });
 
+function openAuth(mode="register") {
+  setAuthMode(mode);
+  $("app").hidden = true;
+  $("authScreen").hidden = false;
+}
+
+$("registerBtn").onclick = () => openAuth("register");
+$("authBack").onclick = () => {
+  $("authScreen").hidden = true;
+  $("app").hidden = false;
+  clearAuthError();
+};
+
 /* MODEL SELECTION */
 
 $("modelSelect").addEventListener("change",() => {
-
   if (!currentUser) return;
-
-  store.set(
-    modelKey(currentUser.uid),
-    $("modelSelect").value
-  );
-
+  store.set(modelKey(currentUser.uid),$("modelSelect").value);
 });
 
 
@@ -1317,6 +1405,10 @@ function active() {
 function renderList() {
 
   $("list").innerHTML="";
+  const registered = !!currentUser && currentUser.uid !== "guest";
+  $("list").hidden = !registered;
+  $("registerBtn").hidden = registered;
+  if (!registered) return;
 
   currentChats.forEach(c => {
 
@@ -1756,16 +1848,27 @@ async function send(text,attachmentsOverride=null) {
     const messages=await buildApiMessages(c);
     const userPayloads=messages.filter(x=>x.role==="user");
     if(!userPayloads.length) throw new Error("Нет сообщений для отправки.");
+    const hasImages = messages.some(m=>Array.isArray(m.content));
     const selectedModel=$("modelSelect").value;
+    const availablePool = hasImages ? IMAGE_MODEL_POOL : FREE_MODEL_POOL;
+    const selectedWorksForInput = !hasImages || availablePool.includes(selectedModel);
+    const requestModels = selectedModel === MODELS.auto || !selectedWorksForInput
+      ? availablePool.slice()
+      : [selectedModel,...availablePool.filter(m=>m!==selectedModel)];
+
+    // OpenRouter tries these models in order if an earlier model/provider fails.
+    // This is one routed request and produces one assistant answer, not one answer per model.
     const r=await fetch(API_URL+"?p=chat/completions",{
       method:"POST",
       signal:ctrl.signal,
       headers:{"Content-Type":"application/json"},
       body:JSON.stringify({
-        model:selectedModel,
+        model:requestModels[0],
+        models:requestModels,
         messages,
         stream:true,
-        max_tokens:8192
+        max_tokens:8192,
+        provider:{allow_fallbacks:true}
       })
     });
 
@@ -1791,20 +1894,24 @@ async function send(text,attachmentsOverride=null) {
           if(!line.startsWith("data:"))continue;
           const data=line.slice(5).trim();
           if(data==="[DONE]")continue;
-          try {
-            const j=JSON.parse(data);
-            let piece=j.choices?.[0]?.delta?.content||"";
-            if(Array.isArray(piece)) piece=piece.map(x=>x.text||"").join("");
-            if(typeof piece==="string"&&piece) {
-              am.content+=piece;
-              if(live()) live().innerHTML=md(am.content);
-              $("msgs").scrollTop=$("msgs").scrollHeight;
-            }
-          } catch(e) {}
+          let j;
+          try { j=JSON.parse(data); } catch(e) { continue; }
+          if (j.error || j.choices?.[0]?.finish_reason === "error") {
+            const detail=j.error?.message||j.error?.metadata?.error_type||"Модели временно недоступны";
+            throw new Error(detail);
+          }
+          let piece=j.choices?.[0]?.delta?.content||"";
+          if(Array.isArray(piece)) piece=piece.map(x=>x.text||"").join("");
+          if(typeof piece==="string"&&piece) {
+            am.content+=piece;
+            if(live()) live().innerHTML=md(am.content);
+            $("msgs").scrollTop=$("msgs").scrollHeight;
+          }
         }
       }
     } else {
       const j=await r.json();
+      if (j.error) throw new Error(j.error.message||"Модели временно недоступны");
       const result=j.choices?.[0]?.message?.content||"";
       am.content=typeof result==="string"?result:
         Array.isArray(result)?result.map(x=>x.text||"").join(""):String(result);
