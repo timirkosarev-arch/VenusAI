@@ -1632,26 +1632,57 @@ async function addFiles(fileList) {
 async function buildApiMessages(chat) {
   const messages=[];
   if(systemPrompt) messages.push({role:"system",content:systemPrompt});
+
   for(const m of chat.messages) {
-    if(m.role!=="user" || !Array.isArray(m.attachments) || !m.attachments.length) {
-      messages.push({role:m.role,content:m.content});
+    const attachments=Array.isArray(m.attachments)?m.attachments:[];
+    if(m.role!=="user" || !attachments.length) {
+      messages.push({role:m.role,content:m.content||""});
       continue;
     }
+
+    // ВАЖНО: текстовые документы отправляем обычной строкой content.
+    // Это совместимо даже с простыми OpenAI-совместимыми прокси.
+    // Массив content используем только тогда, когда реально есть изображения.
     let text=m.content||"";
-    const parts=[];
-    for(const attachment of m.attachments) {
-      const stored=await getMedia(attachment.mediaId);
+    const imageParts=[];
+
+    for(const attachment of attachments) {
+      let stored=null;
+      try { stored=await getMedia(attachment.mediaId); } catch(error) {}
+
       if(!stored) {
-        text+=`\n\n[Файл ${attachment.name} больше недоступен в хранилище браузера.]`;
-      } else if(attachment.kind==="image" && stored.dataUrl) {
-        parts.push({type:"image_url",image_url:{url:stored.dataUrl}});
-      } else if(stored.text) {
-        text+=`\n\n--- Файл: ${attachment.name} ---\n${stored.text}\n--- Конец файла ---`;
+        text+=`\n\n[Не удалось прочитать вложение «${attachment.name}»: файл отсутствует в хранилище браузера. Прикрепите его повторно.]`;
+        continue;
+      }
+
+      if(attachment.kind==="image") {
+        if(stored.dataUrl) {
+          imageParts.push({
+            type:"image_url",
+            image_url:{url:stored.dataUrl,detail:"auto"}
+          });
+          text+=`\n[Прикреплено изображение: ${attachment.name}. Изучи его содержимое.]`;
+        } else {
+          text+=`\n[Изображение «${attachment.name}» не удалось загрузить.]`;
+        }
+      } else if(typeof stored.text==="string") {
+        text+=`\n\n===== НАЧАЛО ФАЙЛА: ${attachment.name} =====\n${stored.text}\n===== КОНЕЦ ФАЙЛА: ${attachment.name} =====`;
+      } else {
+        text+=`\n[Файл «${attachment.name}» прикреплён, но текст из него извлечь не удалось.]`;
       }
     }
-    parts.unshift({type:"text",text:text||"Изучи прикреплённые изображения и файлы и помоги с ними."});
-    messages.push({role:"user",content:parts});
+
+    if(imageParts.length) {
+      messages.push({
+        role:"user",
+        content:[{type:"text",text:text||"Изучи прикреплённое изображение."},...imageParts]
+      });
+    } else {
+      // Документы, PDF, DOCX, XLSX, TXT, код и прочий текст — строкой.
+      messages.push({role:"user",content:text||"Изучи прикреплённые файлы и помоги с ними."});
+    }
   }
+
   return messages;
 }
 
@@ -1742,6 +1773,8 @@ async function send(text,attachmentsOverride=null) {
 
   try {
     const messages=await buildApiMessages(c);
+    const userPayloads=messages.filter(x=>x.role==="user");
+    if(!userPayloads.length) throw new Error("Нет сообщений для отправки.");
     const selectedModel=$("modelSelect").value;
     const r=await fetch(API_URL+"?p=chat/completions",{
       method:"POST",
