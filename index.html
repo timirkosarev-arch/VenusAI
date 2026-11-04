@@ -760,7 +760,7 @@ textarea::placeholder {color:var(--muted)}
           accept="image/*,.pdf,.txt,.md,.json,.csv,.html,.htm,.css,.js,.mjs,.ts,.tsx,.jsx,.py,.lua,.java,.c,.cpp,.h,.cs,.go,.rs,.sql,.xml,.yaml,.yml,.toml,.ini,.log,.sh,.docx,.xlsx" />
 
         <select class="model-select" id="modelSelect" title="Модель">
-          <option value="am/nemotron-3-ultra-550b-a55b">Flash</option>
+          <option value="nvidia/nemotron-3-ultra-550b-a55b:free">Flash</option>
         </select>
 
         <button class="send" id="send" disabled
@@ -892,20 +892,20 @@ const DEFAULT_SYS = `Ты Venus AI — сильный и практичный И
 - При неоднозначностях выбирай разумные настройки самостоятельно; задавай вопрос только при реальной необходимости.`;
 
 const MODELS = {
-  auto: "am/nemotron-3-ultra-550b-a55b",
-  flash: "am/nemotron-3-ultra-550b-a55b",
-  medium: "am/nemotron-3-ultra-550b-a55b"
+  auto: "nvidia/nemotron-3-ultra-550b-a55b:free",
+  flash: "nvidia/nemotron-3-ultra-550b-a55b:free",
+  medium: "nvidia/nemotron-3-ultra-550b-a55b:free"
 };
 
 // Free OpenRouter models, ordered by the preferred fallback priority.
 // The API will use the first available model and return ONE answer.
 const FREE_MODEL_POOL = [
-  "am/nemotron-3-ultra-550b-a55b"
+  "nvidia/nemotron-3-ultra-550b-a55b:free"
 ];
 
 // Restrict image prompts to models with confirmed image input support.
 const IMAGE_MODEL_POOL = [
-  "am/nemotron-3-ultra-550b-a55b"
+  "nvidia/nemotron-3-ultra-550b-a55b:free"
 ];
 
 const ALL_MODEL_VALUES = new Set([
