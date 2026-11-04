@@ -1,6 +1,6 @@
 export const config = { runtime: 'edge' };
 
-const BASE = 'https://api.drakezakuru.com/v1/';
+const BASE = 'https://openrouter.ai/api/v1/';
 
 export default async function handler(req) {
   const cors = {
